@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>Update Ride</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <script type="text/javascript" src="static/js/jquery-ui/jquery-3.3.1.min.js"></script>
+    <script src="static/js/jquery-ui/jquery-ui.js"></script>
+    <link href="static/js/jquery-ui/jquery-ui.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+</head>
+<body class="bodybg">
+        
+	<div id="topbar">
+		<img id="logo" src="static/images/taxi.jpg">
+		
+		<div id="sign-in-div" class="topbar-section">
+				<img id="signin-image" src="static/images/signin.jpg">
+				
+				<a href="index.html"><span id="signintext">Sign out</span></a>
+			</div>  
+		
+	</div>
+    
+    <div class="clear"></div>
+            
+    <div id="menubar-container">
+            
+		<div id="menubar">
+		
+			<h1>RIDE-MY-WAY</h1>
+			
+		
+		</div>
+			
+		<div class="clear"></div>
+            
+        <div id="menubar2-container">
+            
+            <div id="menubar2">
+                
+                <p>Nairobi To Naivasha</p>
+                <a href="index.html"> Home </a>
+                <a href="allrides.html"> Rides </a>
+                <a href="driverrides.html"> My Rides </a>     
+                
+            </div>
+
+        </div>
+
+    
+        <div class="clear"></div>
+    
+        <div id="page-container">
+            
+            <div id="main-description">
+            
+                <h2>Requests</h2>
+                
+              	<div>
+                	<table class="table">
+
+						<tr>
+							<th>id</th>
+							<th>Name</th>
+							<th>Accept/Reject</th>
+						</tr>
+
+						<tr>
+							<td>1</td>
+							<td>Peter Mwongela</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+
+						<tr>
+							<td>3</td>
+							<td>Penninah Kenzo</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+							
+						<tr>
+							<td>6</td>
+							<td>Shakira Njeri</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+							
+
+						<tr>
+							<td>10</td>
+							<td>Simson Kelly</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+							
+
+						<tr>
+							<td>13</td>
+							<td>Kamau Ken</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+							
+
+						<tr>
+							<td>15</td>
+							<td>Simon Kim</td>
+							<td>
+							<a class="button" href="#">Accept</a>
+							<a class="button" href="#">Reject</a>
+							</td>
+						</tr>
+                    
+                	</table>
+                    
+            	</div>
+                    
+        	</div>
+
+            <div id="available">
+                   
+				<div class="formwrapper">
+
+					<h2>Update Trip</h2>
+
+					<div class="form-element">
+
+						<label class="label" for="pick-up-point">Pick-up Point</label>
+						<input class="inputt" value="Nairobi" required>
+
+						</div>
+
+					<div class="form-element">
+
+						<label class="label" for="destination">Destination</label>
+						<input class="inputt" value="Naivasha" required>
+
+					</div>
+
+					<div class="form-element">
+
+						<label class="label" for="passengers">Passengers</label>
+						<input class="inputt"  value=4 required>
+
+					</div>
+
+					<div class="form-element">
+
+						<label class="label" for="Departure">Departure</label>
+						<input class="inputt" value="17/04/2018 1000HRS" required>
+
+					</div>
+					
+					<div class="form-element">
+
+						<a href="driverrides.html"><input class="inputt" type="submit" id="submitButton" value="Update Ride"></a>
+
+					</div>
+				</div>
+			</div>
+        </div>
+    </div>
+</body>
+</html>
