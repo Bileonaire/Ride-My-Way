@@ -23,7 +23,7 @@ These instructions will get you a copy of the project up and running on your loc
 1. Clone the repository
 
 ```
-$ git clone https://github.com/Bileonaire/Leon-Library.git
+$ https://github.com/Bileonaire/Ride-My-Way.git
 $ cd into the created folder
 ```
   
