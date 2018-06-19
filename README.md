@@ -124,7 +124,7 @@ Most recent version is version 1
 
 ## Authors
 
-Leon Kioko.
+Bileonaire Leon.
 
 ## License
 
