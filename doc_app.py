@@ -12,7 +12,7 @@ swagger = Swagger(app)
 
 
 # Users
-@app.route('/api/v1/auth/userregister/', methods=["POST"])
+@app.route('/api/v1/auth/userregister', methods=["POST"])
 def signup():
     """ endpoint for registering users.
     ---
@@ -50,7 +50,7 @@ def login():
         required: true
     """
   
-@app.route('/api/v1/auth/driverregister/', methods=["POST"])
+@app.route('/api/v1/auth/driverregister', methods=["POST"])
 def Driversignup():
     """ endpoint for registering users.
     ---
@@ -270,6 +270,10 @@ def start_a_ride():
       - name: ride_id
         in: path
         type: integer
+        required: true
+      - name: x-access-token
+        in: header
+        type: string
         required: true
     """
 
