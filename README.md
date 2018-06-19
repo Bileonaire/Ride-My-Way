@@ -6,7 +6,7 @@
 # Ride My Way Bileonaire Rides
 Bileonaire Rides is a carpooling application that provides drivers with the ability to create ride oﬀers  and passengers to join available ride oﬀers. 
 
-![Home Image](https://raw.github.com/Bileonaire/LEON_LIBRARY_2/Feature-API/bileonaire.jpg)
+![Home Image](https://raw.github.com/Bileonaire/Ride-My-Way/Develop-V1-API/bileonaire.jpg)
 
 ## Getting Started
 
