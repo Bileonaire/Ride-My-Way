@@ -44,7 +44,7 @@ class User_Register(Resource):
             trim=True,
             help='kindly provide a valid confirmation password',
             location=['form', 'json'])
-       
+
         super().__init__()
 
     def post(self):
@@ -52,14 +52,17 @@ class User_Register(Resource):
         kwargs = self.reqparse.parse_args()
         for user_id in models.all_users:
             if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                return make_response(jsonify({
+                    "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
                 result = models.User.create_user(usertype="user", **kwargs)
                 return make_response(jsonify(result), 201)
-            return make_response(jsonify({"message" : "password should be atleast 8 characters"}), 400)
-        return make_response(jsonify({"message" : "password and cofirm password should be identical"}), 400)
+            return make_response(jsonify({
+                "message" : "password should be atleast 8 characters"}), 400)
+        return make_response(jsonify({
+            "message" : "password and cofirm password should be identical"}), 400)
 
 class Driver_Register(Resource):
     "Contains a POST method to register a new user"
@@ -108,14 +111,17 @@ class Driver_Register(Resource):
         kwargs = self.reqparse.parse_args()
         for user_id in models.all_users:
             if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                return make_response(jsonify({
+                    "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
                 result = models.User.create_user(usertype="driver", **kwargs)
                 return make_response(jsonify(result), 201)
-            return make_response(jsonify({"message" : "password should be atleast 8 characters"}), 400)
-        return make_response(jsonify({"message" : "password and cofirm password should be identical"}), 400)
+            return make_response(jsonify({
+                "message" : "password should be atleast 8 characters"}), 400)
+        return make_response(jsonify({
+            "message" : "password and cofirm password should be identical"}), 400)
 
 class Login(Resource):
     "Contains a POST method to login a user"
@@ -143,17 +149,18 @@ class Login(Resource):
         kwargs = self.reqparse.parse_args()
         for user_id in models.all_users:
             if models.all_users.get(user_id)["email"] == kwargs.get("email") and \
-                check_password_hash(models.all_users.get(user_id)["password"],kwargs.get("password")):
-                
+                check_password_hash(models.all_users.get(user_id)["password"],
+                                    kwargs.get("password")):
+
                 token = jwt.encode({
-                'id' : user_id,
-                'usertype' : models.all_users.get(user_id)['usertype'],
-                'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
-                               config.Config.SECRET_KEY)
+                    'id' : user_id,
+                    'usertype' : models.all_users.get(user_id)['usertype'],
+                    'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
+                                   config.Config.SECRET_KEY)
 
                 return make_response(jsonify({
-                "message" : "success, you have been successfully logged in, add the token to the header as x-access-token for authentication",
-                "token" : token.decode('UTF-8')}), 200)
+                    "message" : "successfully logged in",
+                    "x-access-token for authentication" : token.decode('UTF-8')}), 200)
         return make_response(jsonify({"message" : "invalid email address or password"}), 400)
 
 
@@ -204,22 +211,25 @@ class UserList(Resource):
             required=False,
             location=['form', 'json'])
         super().__init__()
-    
+
     @admin_required
     def post(self):
         """Register a new user or driver or admin"""
         kwargs = self.reqparse.parse_args()
         for user_id in models.all_users:
             if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                return make_response(jsonify({
+                    "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
                 result = models.User.create_user(**kwargs)
                 return make_response(jsonify(result), 201)
-            return make_response(jsonify({"message" : "password should be at least 8 characters"}), 400)
-        return make_response(jsonify({"message" : "password and confirm password should be identical"}), 400)
-    
+            return make_response(jsonify({
+                "message" : "password should be at least 8 characters"}), 400)
+        return make_response(jsonify({
+            "message" : "password and confirm password should be identical"}), 400)
+
     @admin_required
     def get(self):
         """Get all users"""
@@ -271,7 +281,7 @@ class User(Resource):
             required=False,
             location=['form', 'json'])
         super().__init__()
-        
+
     @admin_required
     def get(self, user_id):
         """Get a particular user"""
@@ -282,26 +292,28 @@ class User(Resource):
 
         except KeyError:
             return make_response(jsonify({"message" : "user does not exist"}), 404)
-    
+
     @admin_required
     def put(self, user_id):
         """Update a particular user"""
         kwargs = self.reqparse.parse_args()
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.update_user(user_id = user_id,
-            username = kwargs.get('username'),
-            email = kwargs.get('email'),
-            password = kwargs.get('password'),
-            numberplate = kwargs.get('numberplate'),
-            carmodel = kwargs.get('carmodel'),
-            usertype = kwargs.get('usertype'))
+                result = models.User.update_user(user_id=user_id,
+                                                 username=kwargs.get('username'),
+                                                 email=kwargs.get('email'),
+                                                 password=kwargs.get('password'),
+                                                 numberplate=kwargs.get('numberplate'),
+                                                 carmodel=kwargs.get('carmodel'),
+                                                 usertype=kwargs.get('usertype'))
                 if result != {"message" : "user does not exist"}:
                     return make_response(jsonify(result), 200)
                 return make_response(jsonify(result), 404)
-            return make_response(jsonify({"message" : "password should be at least 8 characters"}), 400)
-        return make_response(jsonify({"message" : "password and confirm password should be identical"}), 400)
-    
+            return make_response(jsonify({
+                "message" : "password should be at least 8 characters"}), 400)
+        return make_response(jsonify({
+            "message" : "password and confirm password should be identical"}), 400)
+
     @admin_required
     def delete(self, user_id):
         """Delete a particular user"""

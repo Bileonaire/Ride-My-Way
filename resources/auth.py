@@ -25,7 +25,7 @@ def user_required(f):
         except:
             return make_response(jsonify({
                 "message" : "kindly provide a valid token in the header"}), 401)
-        
+
         return f(*args, **kwargs)
 
     return decorated
@@ -45,13 +45,13 @@ def admin_required(f):
         try:
             data = jwt.decode(token, config.Config.SECRET_KEY)
             if data['usertype'] != "admin":
-                return make_response(jsonify({"message" : "you are not authorized to perform this function as a non-admin user"}), 401)
+                return make_response(jsonify({
+                    "message" : "Not authorized to perform this function as a non-admin"}), 401)
 
         except:
             return make_response(jsonify({
                 "message" : "kindly provide a valid token in the header"}), 401)
 
-        
         return f(*args, **kwargs)
 
     return decorated
@@ -70,11 +70,12 @@ def driver_required(f):
         try:
             data = jwt.decode(token, config.Config.SECRET_KEY)
             if data['usertype'] != "driver":
-                return make_response(jsonify({"message" : "you are not authorized to perform this function as a non-driver user"}), 401)
+                return make_response(jsonify({
+                    "message" : "Not authorized to perform this function as a non-driver"}), 401)
         except:
             return make_response(jsonify({
                 "message" : "kindly provide a valid token in the header"}), 401)
-        
+
         return f(*args, **kwargs)
 
     return decorated
@@ -97,5 +98,5 @@ def driver_admin_required(f):
         except:
             return make_response(jsonify({
                 "message" : "kindly provide a valid token in the header"}), 401)
-        
+
     return decorated

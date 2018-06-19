@@ -9,6 +9,8 @@ from resources.users import users_api
 
 
 def create_app(configuration):
+    """Creates the flask app"""
+
     app = Flask(__name__)
     app.config.from_object(configuration)
     app.url_map.strict_slashes = False
@@ -23,6 +25,8 @@ app = create_app('config.ProductionConfig')
 
 @app.route('/')
 def hello_world():
+    """Tests running of the flask app"""
+    
     return 'Welcome to Ride My Way. Bileonaire Rides'
 
 

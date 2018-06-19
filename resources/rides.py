@@ -1,14 +1,12 @@
 """Contains all endpoints to manipulate ride information
 """
-import datetime
-
 from flask import request, jsonify, Blueprint, make_response
-from flask_restful import Resource, Api, reqparse, inputs
+from flask_restful import Resource, Api, reqparse
 import jwt
 
 import models
 import config
-from .auth import user_required, admin_required, driver_required, driver_admin_required
+from .auth import user_required, driver_required, driver_admin_required
 
 
 class RideList(Resource):
@@ -43,7 +41,7 @@ class RideList(Resource):
             help="kindly provide a valid integer of the maximum number of passengers",
             location=['form', 'json'])
         super().__init__()
-    
+
     @driver_required
     def post(self):
         """Adds a new ride"""
@@ -92,7 +90,6 @@ class Ride(Resource):
             required=True,
             location=['form', 'json'])
         super().__init__()
-    
 
     def get(self, ride_id):
         """Get a particular ride"""
@@ -113,8 +110,7 @@ class Ride(Resource):
         if result == {"message" : "ride has started"}:
             return make_response(jsonify(result), 200)
         return make_response(jsonify(result), 404)
-    
-    
+
     @driver_required
     def put(self, ride_id):
         """Update a particular ride"""
@@ -128,7 +124,7 @@ class Ride(Resource):
         if result != {"message" : "ride does not exist"}:
             return make_response(jsonify(result), 200)
         return make_response(jsonify(result), 404)
-    
+
     @driver_admin_required
     def delete(self, ride_id):
         """Delete a particular ride"""
@@ -138,10 +134,12 @@ class Ride(Resource):
         return make_response(jsonify(result), 404)
 
 class RequestRide(Resource):
+    """Contains POST method for requsting a particular ride"""
 
 
     @user_required
     def post(self, ride_id):
+        """Request a particular ride"""
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
         user_id = data['id']
@@ -151,7 +149,7 @@ class RequestRide(Resource):
 
 
 class RequestList(Resource):
-
+    """Contains GET method to get all requests"""
 
     @driver_admin_required
     def get(self):
@@ -186,9 +184,10 @@ class Request(Resource):
             if models.all_rides[result["ride_id"]]["driver_id"] == driver_id:
                 update = models.Requests.update_request(request_id)
                 return make_response(jsonify(update), 200)
-            return make_response(jsonify({"message" : "the ride request you are updating is not of your ride"}), 404)
+            return make_response(jsonify({
+                "message" : "the ride request you are updating is not of your ride"}), 404)
         return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
-        
+
     @user_required
     def delete(self, request_id):
         """Delete a particular request"""
@@ -202,9 +201,9 @@ class Request(Resource):
             if result["user_id"] == currentuser_id:
                 delete = models.Requests.delete_request(request_id)
                 return make_response(jsonify(delete), 200)
-            return make_response(jsonify({"message" : "the ride request you are deleting is not your request"}), 404)
+            return make_response(jsonify({
+                "message" : "the ride request you are deleting is not your request"}), 404)
         return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
-        
 
 rides_api = Blueprint('resources.rides', __name__)
 api = Api(rides_api)

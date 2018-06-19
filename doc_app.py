@@ -49,7 +49,7 @@ def login():
         type: password
         required: true
     """
-  
+
 @app.route('/api/v1/auth/driverregister', methods=["POST"])
 def Driversignup():
     """ endpoint for registering users.
@@ -310,7 +310,7 @@ def update_ride():
         required: true
         in: path
         type: integer
-      
+
     """
 
 @app.route('/api/v1/rides/<int:ride_id>', methods=["DELETE"])
@@ -404,7 +404,7 @@ def delete_borrowed():
 @app.route('/')
 def hello_world():
     "test that flask app is running"
-    return "To view the docs visit: https://bileonaireridesv1.herokuapp.com/apidocs" 
+    return "To view the docs visit: https://bileonaireridesv1.herokuapp.com/apidocs"
 
 
 if __name__ == "__main__":
