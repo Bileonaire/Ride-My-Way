@@ -58,7 +58,7 @@ At the / endpoint you should see Welcome to library books API displayed in your 
 
 ## Endpoints
 
-Here is a list of all endpoints in the Library API
+Here is a list of all endpoints in the Bileonaire Rides API
 
 Endpoint | Functionality 
 ------------ | -------------
