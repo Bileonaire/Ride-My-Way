@@ -57,7 +57,10 @@ class User_Register(Resource):
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.create_user(usertype="user", **kwargs)
+                result = models.User.create_user(username=kwargs.get('username'),
+                                                 email=kwargs.get('email'),
+                                                 password=kwargs.get('password'),
+                                                 usertype="user")
                 return make_response(jsonify(result), 201)
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
@@ -116,7 +119,12 @@ class Driver_Register(Resource):
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.create_user(usertype="driver", **kwargs)
+                result = models.User.create_user(username=kwargs.get('username'),
+                                                 email=kwargs.get('email'),
+                                                 password=kwargs.get('password'),
+                                                 numberplate=kwargs.get('numberplate'),
+                                                 carmodel=kwargs.get('carmodel'),
+                                                 usertype="driver")
                 return make_response(jsonify(result), 201)
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
@@ -160,7 +168,7 @@ class Login(Resource):
 
                 return make_response(jsonify({
                     "message" : "successfully logged in",
-                    "x-access-token for authentication" : token.decode('UTF-8')}), 200)
+                    "token" : token.decode('UTF-8')}), 200)
         return make_response(jsonify({"message" : "invalid email address or password"}), 400)
 
 
@@ -223,7 +231,12 @@ class UserList(Resource):
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.create_user(**kwargs)
+                result = models.User.create_user(username=kwargs.get('username'),
+                                                 email=kwargs.get('email'),
+                                                 password=kwargs.get('password'),
+                                                 numberplate=kwargs.get('numberplate'),
+                                                 carmodel=kwargs.get('carmodel'),
+                                                 usertype=kwargs.get('usertype'))
                 return make_response(jsonify(result), 201)
             return make_response(jsonify({
                 "message" : "password should be at least 8 characters"}), 400)
