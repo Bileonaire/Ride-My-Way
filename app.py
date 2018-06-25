@@ -4,7 +4,7 @@ import os
 import datetime
 
 from flask import Flask
-
+# pylint: disable=W0612
 from resources.users import users_api
 from resources.rides import rides_api
 
