@@ -12,7 +12,7 @@ swagger = Swagger(app)
 
 
 # Users
-@app.route('/api/v1/auth/userregister', methods=["POST"])
+@app.route('/api/v2/auth/userregister', methods=["POST"])
 def signup():
     """ endpoint for registering users.
     ---
@@ -35,7 +35,7 @@ def signup():
         required: true
     """
 
-@app.route('/api/v1/auth/login', methods=["POST"])
+@app.route('/api/v2/auth/login', methods=["POST"])
 def login():
     """ endpoint for logging in users.
     ---
@@ -50,7 +50,7 @@ def login():
         required: true
     """
 
-@app.route('/api/v1/auth/driverregister', methods=["POST"])
+@app.route('/api/v2/auth/driverregister', methods=["POST"])
 def Driversignup():
     """ endpoint for registering users.
     ---
@@ -82,7 +82,7 @@ def Driversignup():
     """
 
 
-@app.route('/api/v1/users', methods=["POST"])
+@app.route('/api/v2/users', methods=["POST"])
 def users_create():
     """ endpoint for creating users.
     ---
@@ -122,7 +122,7 @@ def users_create():
         required: false
     """
 
-@app.route("/api/v1/users", methods=["GET"])
+@app.route("/api/v2/users", methods=["GET"])
 def get_all_users():
     """endpoint for  getting all users.
      ---
@@ -133,7 +133,7 @@ def get_all_users():
         required: true
     """
 
-@app.route("/api/v1/users/<int:user_id>", methods=["GET"])
+@app.route("/api/v2/users/<int:user_id>", methods=["GET"])
 def get_one_user():
     """endpoint for  getting a particular user.
     ---
@@ -148,7 +148,7 @@ def get_one_user():
         required: true
     """
 
-@app.route('/api/v1/users/<int:user_id>', methods=["PUT"])
+@app.route('/api/v2/users/<int:user_id>', methods=["PUT"])
 def update_user():
     """ endpoint for updating an existing user.
     ---
@@ -192,7 +192,7 @@ def update_user():
         required: false
     """
 
-@app.route('/api/v1/users/<int:user_id>', methods=["DELETE"])
+@app.route('/api/v2/users/<int:user_id>', methods=["DELETE"])
 def delete_user():
     """ endpoint for deleting an existing user.
     ---
@@ -209,7 +209,7 @@ def delete_user():
 
 
 # Ride
-@app.route('/api/v1/rides', methods=["POST"])
+@app.route('/api/v2/rides', methods=["POST"])
 def create_ride():
     """ endpoint for creating a ride.
     ---
@@ -240,7 +240,7 @@ def create_ride():
         type: integer
     """
 
-@app.route("/api/v1/rides", methods=["GET"])
+@app.route("/api/v2/rides", methods=["GET"])
 def get_all_rides():
     """endpoint for getting all rides.
     ---
@@ -251,7 +251,7 @@ def get_all_rides():
         required: false
     """
 
-@app.route("/api/v1/rides/<int:ride_id>", methods=["GET"])
+@app.route("/api/v2/rides/<int:ride_id>", methods=["GET"])
 def get_one_ride():
     """endpoint for  getting a particular ride.
     ---
@@ -262,7 +262,7 @@ def get_one_ride():
         required: true
     """
 
-@app.route("/api/v1/rides/<int:ride_id>", methods=["POST"])
+@app.route("/api/v2/rides/<int:ride_id>", methods=["POST"])
 def start_a_ride():
     """endpoint for  starting a particular ride.
     ---
@@ -277,7 +277,7 @@ def start_a_ride():
         required: true
     """
 
-@app.route('/api/v1/rides/<int:ride_id>', methods=["PUT"])
+@app.route('/api/v2/rides/<int:ride_id>', methods=["PUT"])
 def update_ride():
     """ endpoint for updating an existing ride.
     ---
@@ -313,7 +313,7 @@ def update_ride():
 
     """
 
-@app.route('/api/v1/rides/<int:ride_id>', methods=["DELETE"])
+@app.route('/api/v2/rides/<int:ride_id>', methods=["DELETE"])
 def delete_ride():
     """ endpoint for deleting an existing ride.
     ---
@@ -330,7 +330,7 @@ def delete_ride():
 
 
 # request
-@app.route('/api/v1/rides/<int:ride_id>/requests', methods=["POST"])
+@app.route('/api/v2/rides/<int:ride_id>/requests', methods=["POST"])
 def request_ride():
     """ endpoint for requesting ride.
     ---
@@ -345,7 +345,7 @@ def request_ride():
         type: string
     """
 
-@app.route("/api/v1/requests", methods=["GET"])
+@app.route("/api/v2/requests", methods=["GET"])
 def get_all_requests():
     """endpoint for  getting all requests.
     ---
@@ -356,7 +356,7 @@ def get_all_requests():
         required: true
     """
 
-@app.route("/api/v1/requests/<int:request_id>", methods=["GET"])
+@app.route("/api/v2/requests/<int:request_id>", methods=["GET"])
 def get_one_request():
     """endpoint for getting a particular request.
     ---
@@ -371,7 +371,7 @@ def get_one_request():
         required: true
     """
 
-@app.route('/api/v1/requests/<int:request_id>', methods=["PUT"])
+@app.route('/api/v2/requests/<int:request_id>', methods=["PUT"])
 def update_request():
     """ endpoint for accepting/rejecting a request.
     ---
@@ -386,7 +386,7 @@ def update_request():
         type: string
     """
 
-@app.route('/api/v1/requests/<int:request_id>', methods=["DELETE"])
+@app.route('/api/v2/requests/<int:request_id>', methods=["DELETE"])
 def delete_borrowed():
     """ endpoint for deleting an existing request.
     ---
@@ -404,7 +404,7 @@ def delete_borrowed():
 @app.route('/')
 def hello_world():
     "test that flask app is running"
-    return "To view the docs visit: https://bileonaireridesv1.herokuapp.com/apidocs"
+    return "To view the docs visit: https://bileonaireclub.herokuapp.com/apidocs"
 
 
 if __name__ == "__main__":
