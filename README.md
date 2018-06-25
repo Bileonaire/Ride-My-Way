@@ -1,4 +1,4 @@
-[![Build Status](https://travis-ci.org/Bileonaire/Ride-My-Way.svg?branch=Develop-V1-API)](https://travis-ci.org/Bileonaire/Ride-My-Way)
+[![Build Status](https://travis-ci.org/Bileonaire/Ride-My-Way.svg?branch=Develop-V2-API)](https://travis-ci.org/Bileonaire/Ride-My-Way)
 [![Coverage Status](https://coveralls.io/repos/github/Bileonaire/Ride-My-Way/badge.svg?branch=Develop-V1-API)](https://coveralls.io/github/Bileonaire/Ride-My-Way?branch=Develop-V1-API)
 [![PEP8](https://img.shields.io/badge/code%20style-pep8-green.svg)](https://www.python.org/dev/peps/pep-0008/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
@@ -62,25 +62,25 @@ Here is a list of all endpoints in the Bileonaire Rides API
 
 Endpoint | Functionality 
 ------------ | -------------
-POST   /api/v1/auth/userregister | Register a user
-POST   /api/v1/auth/driverregister | Register a driver
-POST   /api/v1/auth/login | Log in user
-POST   /api/v1/users | Create a user
-GET    /api/v1/users | Get all users
-GET   /api/v1/users/id | Get a single user
-PUT  /api/v1/users/id | Update a single user
-DELETE   /api/v1/users/id | Delete a single user
-POST   /api/v1/rides | Create new ride
-GET   /api/v1/rides | Get all rides
-GET   /api/v1/rides/id | Get a single ride
-PUT   /api/v1/rides/id | Update a single ride
-POST   /api/v1/rides/id/ | Start a ride
-DELETE   /api/v1/rides/id | Delete a single ride
-POST   /api/v1/rides/id/requests | Request a ride
-GET   /api/v1/requests | Get all requests
-DELETE   /api/v1/requests/id | Delete a single request
-GET   /api/v1/requests/id | Get a single request
-PUT  /api/v1/requests/id | Accept/Reject a request
+POST   /api/v2/auth/userregister | Register a user
+POST   /api/v2/auth/driverregister | Register a driver
+POST   /api/v2/auth/login | Log in user
+POST   /api/v2/users | Create a user
+GET    /api/v2/users | Get all users
+GET   /api/v2/users/id | Get a single user
+PUT  /api/v2/users/id | Update a single user
+DELETE   /api/v2/users/id | Delete a single user
+POST   /api/v2/rides | Create new ride
+GET   /api/v2/rides | Get all rides
+GET   /api/v2/rides/id | Get a single ride
+PUT   /api/v2/rides/id | Update a single ride
+POST   /api/v2/rides/id/ | Start a ride
+DELETE   /api/v2/rides/id | Delete a single ride
+POST   /api/v2/rides/id/requests | Request a ride
+GET   /api/v2/requests | Get all requests
+DELETE   /api/v2/requests/id | Delete a single request
+GET   /api/v2/requests/id | Get a single request
+PUT  /api/v2/requests/id | Accept/Reject a request
 
 ## Running the tests
 
@@ -116,7 +116,7 @@ https://Bileonaire.github.io/
 
 ## Heroku
 
-https://bileonaireridesv1.herokuapp.com/apidocs
+https://bileonaireclub.herokuapp.com/apidocs
 
 ## Versioning
 
