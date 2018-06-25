@@ -3,6 +3,7 @@
 from flask import request, jsonify, Blueprint, make_response
 from flask_restful import Resource, Api, reqparse
 import jwt
+# pylint: disable=W0612
 
 import models
 import config
@@ -51,12 +52,12 @@ class RideList(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
-        result = models.Ride.create_ride(driverid=driver_id, **kwargs)
-        return make_response(jsonify(result), 201)
+        result = models.Ride.create_ride(driver_id=driver_id, **kwargs)
+        return result
 
     def get(self):
         """Gets all rides"""
-        return make_response(jsonify(models.all_rides), 200)
+        return models.Ride.get_all_rides()
 
 
 class Ride(Resource):
@@ -93,11 +94,8 @@ class Ride(Resource):
 
     def get(self, ride_id):
         """Get a particular ride"""
-        try:
-            ride = models.all_rides[ride_id]
-            return make_response(jsonify(ride), 200)
-        except KeyError:
-            return make_response(jsonify({"message" : "ride does not exist"}), 404)
+        return models.Ride.get_ride(ride_id)
+
 
     @driver_required
     def post(self, ride_id):
@@ -106,7 +104,7 @@ class Ride(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
-        result = models.Ride.start_ride(ride_id, driver_id=driver_id)
+        result = models.Ride.start_ride(ride_id=ride_id, driver_id=driver_id)
         if result == {"message" : "ride has started"}:
             return make_response(jsonify(result), 200)
         return make_response(jsonify(result), 404)
@@ -120,18 +118,14 @@ class Ride(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
-        result = models.Ride.update_ride(ride_id, driverid=driver_id, **kwargs)
-        if result != {"message" : "ride does not exist"}:
-            return make_response(jsonify(result), 200)
-        return make_response(jsonify(result), 404)
+        result = models.Ride.update_ride(ride_id=ride_id, driver_id=driver_id, **kwargs)
+        return result
 
     @driver_admin_required
     def delete(self, ride_id):
         """Delete a particular ride"""
         result = models.Ride.delete_ride(ride_id)
-        if result != {"message" : "the ride does not exist"}:
-            return make_response(jsonify(result), 200)
-        return make_response(jsonify(result), 404)
+        return result
 
 class RequestRide(Resource):
     """Contains POST method for requsting a particular ride"""
@@ -144,8 +138,8 @@ class RequestRide(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         user_id = data['id']
 
-        result = models.Requests.request_ride(ride_id=ride_id, user_id=user_id)
-        return make_response(jsonify(result), 201)
+        result = models.Request.request_ride(ride_id=ride_id, user_id=user_id)
+        return result
 
 
 class RequestList(Resource):
@@ -154,7 +148,8 @@ class RequestList(Resource):
     @driver_admin_required
     def get(self):
         """Gets all requests"""
-        return make_response(jsonify(models.all_requests), 200)
+        result = models.Request.get_all_requests()
+        return result
 
 
 class Request(Resource):
@@ -164,11 +159,8 @@ class Request(Resource):
     @user_required
     def get(self, request_id):
         """Get a particular request"""
-        try:
-            ride = models.all_requests[request_id]
-            return make_response(jsonify(ride), 200)
-        except KeyError:
-            return make_response(jsonify({"message" : "specified request does not exist"}), 404)
+        result = models.Request.get_requests(request_id)
+        return result
 
     @driver_required
     def put(self, request_id):
@@ -179,10 +171,10 @@ class Request(Resource):
         driver_id = data['id']
 
 
-        result = models.all_requests.get(request_id)
-        if result != None:
-            if models.all_rides[result["ride_id"]]["driver_id"] == driver_id:
-                update = models.Requests.update_request(request_id)
+        requesti = models.Request.query.filter_by(id=request_id).first()
+        if requesti != None:
+            if requesti.driver_id == driver_id:
+                update = models.Request.update_request(request_id)
                 return make_response(jsonify(update), 200)
             return make_response(jsonify({
                 "message" : "the ride request you are updating is not of your ride"}), 404)
@@ -196,10 +188,10 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         currentuser_id = data['id']
 
-        result = models.all_requests.get(request_id)
-        if result != None:
-            if result["user_id"] == currentuser_id:
-                delete = models.Requests.delete_request(request_id)
+        requesti = models.Request.query.filter_by(id=request_id).first()
+        if requesti != None:
+            if requesti.user_id == currentuser_id:
+                delete = models.Request.delete_request(request_id)
                 return make_response(jsonify(delete), 200)
             return make_response(jsonify({
                 "message" : "the ride request you are deleting is not your request"}), 404)

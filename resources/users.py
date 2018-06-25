@@ -50,18 +50,15 @@ class User_Register(Resource):
     def post(self):
         """Register a new user"""
         kwargs = self.reqparse.parse_args()
-        for user_id in models.all_users:
-            if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({
-                    "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
                 result = models.User.create_user(username=kwargs.get('username'),
                                                  email=kwargs.get('email'),
                                                  password=kwargs.get('password'),
-                                                 usertype="user")
-                return make_response(jsonify(result), 201)
+                                                 usertype="user",
+                                                 carmodel=None, numberplate=None)
+                return result
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
         return make_response(jsonify({
@@ -112,10 +109,6 @@ class Driver_Register(Resource):
     def post(self):
         """Register a new driver"""
         kwargs = self.reqparse.parse_args()
-        for user_id in models.all_users:
-            if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({
-                    "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
@@ -125,7 +118,7 @@ class Driver_Register(Resource):
                                                  numberplate=kwargs.get('numberplate'),
                                                  carmodel=kwargs.get('carmodel'),
                                                  usertype="driver")
-                return make_response(jsonify(result), 201)
+                return result
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
         return make_response(jsonify({
@@ -155,21 +148,22 @@ class Login(Resource):
     def post(self):
         """login a user"""
         kwargs = self.reqparse.parse_args()
-        for user_id in models.all_users:
-            if models.all_users.get(user_id)["email"] == kwargs.get("email") and \
-                check_password_hash(models.all_users.get(user_id)["password"],
-                                    kwargs.get("password")):
+        by_email = models.User.query.filter_by(email=kwargs.get('email')).first()
+        if by_email == None:
+            return make_response(jsonify({"message" : "invalid email address or password"}), 400)
 
-                token = jwt.encode({
-                    'id' : user_id,
-                    'usertype' : models.all_users.get(user_id)['usertype'],
-                    'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
-                                   config.Config.SECRET_KEY)
+        if check_password_hash(by_email.password, kwargs.get("password")) == True:
+            token = jwt.encode({
+                'id' : by_email.id,
+                'usertype' : by_email.usertype,
+                'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
+                                config.Config.SECRET_KEY)
 
-                return make_response(jsonify({
-                    "message" : "successfully logged in",
-                    "token" : token.decode('UTF-8')}), 200)
+            return make_response(jsonify({
+                "message" : "successfully logged in",
+                "token" : token.decode('UTF-8')}), 200)
         return make_response(jsonify({"message" : "invalid email address or password"}), 400)
+        
 
 
 
@@ -207,16 +201,17 @@ class UserList(Resource):
             location=['form', 'json'])
         self.reqparse.add_argument(
             'usertype',
-            required=False,
-            default="user",
+            required=True,
             location=['form', 'json'])
         self.reqparse.add_argument(
             'numberplate',
             required=False,
+            default=None,
             location=['form', 'json'])
         self.reqparse.add_argument(
             'carmodel',
             required=False,
+            default=None,
             location=['form', 'json'])
         super().__init__()
 
@@ -224,10 +219,10 @@ class UserList(Resource):
     def post(self):
         """Register a new user or driver or admin"""
         kwargs = self.reqparse.parse_args()
-        for user_id in models.all_users:
-            if models.all_users.get(user_id)["email"] == kwargs.get('email'):
-                return make_response(jsonify({
-                    "message" : "user with that email already exists"}), 400)
+        by_email = models.User.query.filter_by(email=kwargs.get('email')).first()
+        if by_email is not None:
+            return make_response(jsonify({
+                "message" : "user with that email already exists"}), 400)
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
@@ -237,7 +232,7 @@ class UserList(Resource):
                                                  numberplate=kwargs.get('numberplate'),
                                                  carmodel=kwargs.get('carmodel'),
                                                  usertype=kwargs.get('usertype'))
-                return make_response(jsonify(result), 201)
+                return result
             return make_response(jsonify({
                 "message" : "password should be at least 8 characters"}), 400)
         return make_response(jsonify({
@@ -246,7 +241,8 @@ class UserList(Resource):
     @admin_required
     def get(self):
         """Get all users"""
-        return make_response(jsonify(models.User.all_users()), 200)
+        result = models.User.get_all_users()
+        return make_response(jsonify(result), 200)
 
 class User(Resource):
     """Contains GET PUT and DELETE methods for interacting with a particular user"""
@@ -298,13 +294,8 @@ class User(Resource):
     @admin_required
     def get(self, user_id):
         """Get a particular user"""
-        try:
-            user = models.all_users[user_id]
-            user = models.User.get_user(user_id)
-            return make_response(jsonify(user), 200)
-
-        except KeyError:
-            return make_response(jsonify({"message" : "user does not exist"}), 404)
+        result = models.User.get_user(user_id)
+        return result
 
     @admin_required
     def put(self, user_id):
@@ -319,9 +310,7 @@ class User(Resource):
                                                  numberplate=kwargs.get('numberplate'),
                                                  carmodel=kwargs.get('carmodel'),
                                                  usertype=kwargs.get('usertype'))
-                if result != {"message" : "user does not exist"}:
-                    return make_response(jsonify(result), 200)
-                return make_response(jsonify(result), 404)
+                return result
             return make_response(jsonify({
                 "message" : "password should be at least 8 characters"}), 400)
         return make_response(jsonify({
@@ -330,10 +319,8 @@ class User(Resource):
     @admin_required
     def delete(self, user_id):
         """Delete a particular user"""
-        result = models.User.delete_user(user_id)
-        if result != {"message" : "user does not exist"}:
-            return make_response(jsonify(result), 200)
-        return make_response(jsonify(result), 404)
+        return models.User.delete_user(user_id)
+
 
 users_api = Blueprint('resources.users', __name__)
 api = Api(users_api)
