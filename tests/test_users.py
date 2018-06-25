@@ -16,17 +16,17 @@ class UsersTests(BaseTests):
 
     def test_admin_get_all(self):
         """Tests successfully getting all users"""
-        response = self.app.get('/api/v1/users', headers=self.admin_header)
+        response = self.app.get('/api/v2/users', headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
 
     def test_user_get_all(self):
         """Tests normal user unauthorized to get get all users"""
-        response = self.app.get('/api/v1/users', headers=self.user_header)
+        response = self.app.get('/api/v2/users', headers=self.user_header)
         self.assertEqual(response.status_code, 401)
 
     def test_no_token_get_all(self):
         """Tests unauthorized to get all users without a token"""
-        response = self.app.get('/api/v1/users')
+        response = self.app.get('/api/v2/users')
         self.assertEqual(response.status_code, 401)
 
     def test_invalid_token_admin(self):
@@ -35,7 +35,7 @@ class UsersTests(BaseTests):
             "Content-Type" : "application/json",
             "x-access-token" : "hbGciOiJIUzI1NiJ9.eyJpZCI6NCwiYWRtaW4iOnRydWUsImV4cCI6MTUyNjczNzQ5Nvm2laNiJek7X266RLLk-bWL-ZF2RuD32FBvg_G8KyM"}
         response = self.app.get(
-            '/api/v1/users',
+            '/api/v2/users',
             headers=invalid_token)
         self.assertEqual(response.status_code, 401)
     
@@ -45,26 +45,55 @@ class UsersTests(BaseTests):
             "Content-Type" : "application/json",
             "x-access-token" : "" }
         response = self.app.get(
-            '/api/v1/users',
+            '/api/v2/users',
             headers=invalid_token)
         self.assertEqual(response.status_code, 401)
 
     def test_good_user_creation(self):
         """Tests successfully creating a new user"""
         data = json.dumps({
-            "username" : "mark444", "email" : "mark444@gmail.com",
-            "password" : "secret12345", "confirm_password" : "secret12345"})
+            "username" : "mark444", "email" : "mkiii@gmail.com",
+            "password" : "secret12345", "confirm_password" : "secret12345", "usertype" : "user"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json', headers=self.admin_header)
         self.assertEqual(response.status_code, 201)
 
+    def test_unmatching_password(self):
+        """Tests unsuccessfully creating a new user"""
+        data = json.dumps({
+            "username" : "mark444", "email" : "mkiii@gmail.com",
+            "password" : "secrenotmatch", "confirm_password" : "secret12345", "usertype" : "user"})
+        response = self.app.post(
+            '/api/v2/users', data=data,
+            content_type='application/json', headers=self.admin_header)
+        self.assertEqual(response.status_code, 400)
+
+    def test_used_email(self):
+        """Tests successfully creating a new user"""
+        data = json.dumps({
+            "username" : "sameemail", "email" : "user@gmail.com",
+            "password" : "secret12345", "confirm_password" : "secret12345", "usertype" : "user"})
+        response = self.app.post(
+            '/api/v2/users', data=data,
+            content_type='application/json', headers=self.admin_header)
+        self.assertEqual(response.status_code, 400)
+
+    def test_less_8_character_password(self):
+        """Tests unsuccessfully creating a new user"""
+        data = json.dumps({
+            "username" : "mark444", "email" : "lesspassi@gmail.com",
+            "password" : "secre", "confirm_password" : "secre", "usertype" : "user"})
+        response = self.app.post(
+            '/api/v2/users', data=data,
+            content_type='application/json', headers=self.admin_header)
+        self.assertEqual(response.status_code, 400)
 
     def test_user_empty_body(self):
         """Test unsuccessful user creation because of empty body"""
         data = json.dumps({})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -75,11 +104,11 @@ class UsersTests(BaseTests):
             "username" : "john", "email" : "johndoe@gmail.com",
             "password" : "secret12345", "confirm_password" : "secret12345"})
         res = self.app.post( # pylint: disable=W0612
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -90,7 +119,7 @@ class UsersTests(BaseTests):
             "username" : "felix", "email" : "felix@gmail.com",
             "password" : "12345678", "confirm_password" : "passwordsecret"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -101,7 +130,7 @@ class UsersTests(BaseTests):
             "username" : "moses", "email" : "moses@gmail.com",
             "password" : "1234567", "confirm_password" : "1234567"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -112,7 +141,7 @@ class UsersTests(BaseTests):
             "username" : "", "email" : "emptyusername@gmail.com",
             "password" : "12345678", "confirm_password" : "12345678"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -123,7 +152,7 @@ class UsersTests(BaseTests):
             "username" : "empty", "email" : "",
             "password" : "secret12345", "confirm_password" : "secret12345"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -134,7 +163,7 @@ class UsersTests(BaseTests):
             "username" : "lenny", "email" : "invalidemail.com",
             "password" : "secret12345", "confirm_password" : "secret12345"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -145,7 +174,7 @@ class UsersTests(BaseTests):
             "username" : "lenny", "email" : "lennymutush@gmail.com",
             "password" : "", "confirm_password" : "secret12345"})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -156,7 +185,7 @@ class UsersTests(BaseTests):
             "username" : "lenny", "email" : "confpassword@gmail.com",
             "password" : "secret", "confirm_password" : ""})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)
@@ -166,7 +195,7 @@ class UsersTests(BaseTests):
         data = json.dumps({"username" : "lenny", "email" : "lennykmutua@gmail.com",
                            "password" : "        ", "confirm_password" : "        "})
         response = self.app.post(
-            '/api/v1/users', data=data,
+            '/api/v2/users', data=data,
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 400)

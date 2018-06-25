@@ -16,31 +16,31 @@ class LoginTests(BaseTests):
 
     def test_good_login(self):
         """Test a successful login"""
-        response = self.app.post('/api/v1/auth/login', data=self.user_log, content_type='application/json')
+        response = self.app.post('/api/v2/auth/login', data=self.user_log, content_type='application/json')
         self.assertEqual(response.status_code, 200)
 
     def test_login_invalid_email(self):
         """Test unsuccessful login because email fails email regex"""
         data = json.dumps({"email" : "usergmail.com", "password" : "12345678"})
-        response = self.app.post('/api/v1/auth/login', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/login', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_login_wrong_email(self):
         """Test unsuccessful login because of wrong email"""
         data = json.dumps({"email" : "usergood@gmail.com", "password" : "12345678"})
-        response = self.app.post('/api/v1/auth/login', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/login', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_login_empty_password(self):
         """Test unsuccessful login because of empty password"""
         data = json.dumps({"email" : "user@gmail.com", "password" : ""})
-        response = self.app.post('/api/v1/auth/login', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/login', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_login_wrong_password(self):
         """Test unsuccessful login because of wrong password"""
         data = json.dumps({"email" : "user@gmail.com", "password" : "secretpassword"})
-        response = self.app.post('/api/v1/auth/login', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/login', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
 

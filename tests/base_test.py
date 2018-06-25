@@ -13,6 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import app
 import models
 
+db = models.db
+
 
 class BaseTests(unittest.TestCase):
     """Authenticate a user and an admin and make the tokens available. Create a ride and request"""
@@ -20,6 +22,13 @@ class BaseTests(unittest.TestCase):
 
     def setUp(self):
         self.application = app.create_app('config.TestingConfig')
+        with self.application.app_context():
+            db.create_all()
+            admin_reg = models.User.create_user(username="admin",
+                                                email="admin@gmail.com",
+                                                password="admin1234",
+                                                usertype="admin")
+
         user_reg = json.dumps({
             "username" : "user",
             "email" : "user@gmail.com",
@@ -62,18 +71,18 @@ class BaseTests(unittest.TestCase):
 
         
         register_user = self.app.post(
-            '/api/v1/auth/userregister', data=user_reg,
+            '/api/v2/auth/userregister', data=user_reg,
             content_type='application/json')
         register_driver = self.app.post(
-            '/api/v1/auth/driverregister', data=driver_reg,
+            '/api/v2/auth/driverregister', data=driver_reg,
             content_type='application/json')
         
         register_driver = self.app.post(
-            '/api/v1/auth/driverregister', data=driver_reg2,
+            '/api/v2/auth/driverregister', data=driver_reg2,
             content_type='application/json')
-        
+
         admin_result = self.app.post(
-            '/api/v1/auth/login', data=self.admin_log,
+            '/api/v2/auth/login', data=self.admin_log,
             content_type='application/json')
         
         admin_response = json.loads(admin_result.get_data(as_text=True))
@@ -81,7 +90,7 @@ class BaseTests(unittest.TestCase):
         self.admin_header = {"Content-Type" : "application/json", "x-access-token" : admin_token}
 
         driver_result = self.app.post(
-            '/api/v1/auth/login', data=self.driver_log,
+            '/api/v2/auth/login', data=self.driver_log,
             content_type='application/json')
 
         driver_response = json.loads(driver_result.get_data(as_text=True))
@@ -89,7 +98,7 @@ class BaseTests(unittest.TestCase):
         self.driver_header = {"Content-Type" : "application/json", "x-access-token" : driver_token}
 
         driver_result2 = self.app.post(
-            '/api/v1/auth/login', data=self.driver_log2,
+            '/api/v2/auth/login', data=self.driver_log2,
             content_type='application/json')
 
         driver_response2 = json.loads(driver_result2.get_data(as_text=True))
@@ -97,7 +106,7 @@ class BaseTests(unittest.TestCase):
         self.driver_header2 = {"Content-Type" : "application/json", "x-access-token" : driver_token2}
         
         user_result = self.app.post(
-            '/api/v1/auth/login', data=self.user_log,
+            '/api/v2/auth/login', data=self.user_log,
             content_type='application/json')
 
         user_response = json.loads(user_result.get_data(as_text=True))
@@ -111,31 +120,23 @@ class BaseTests(unittest.TestCase):
          "departuretime" : "16/04/2015 1400HRS", "cost" : "400", "maximum" : "2"})
 
         create_ride = self.app.post(
-            '/api/v1/rides', data=ride, content_type='application/json',
+            '/api/v2/rides', data=ride, content_type='application/json',
             headers=self.driver_header)
 
         create_ride2 = self.app.post(
-            '/api/v1/rides', data=ride2, content_type='application/json',
+            '/api/v2/rides', data=ride2, content_type='application/json',
             headers=self.driver_header)
 
         requestride = self.app.post(
-            '/api/v1/rides/1/requests',
+            '/api/v2/rides/1/requests',
             headers=self.user_header)
         
         requestride = self.app.post(
-            '/api/v1/rides/2/requests',
+            '/api/v2/rides/2/requests',
             headers=self.user_header)
-    
+
+
     def tearDown(self):
         with self.application.app_context():
-
-            models.all_users = { 1 : {"id": "1", "username" : "admin",
-            "email" : "admin@gmail.com", "password" : generate_password_hash("admin1234", method='sha256'), "usertype" : "admin",
-            "carmodel" : None, "numberplate" : None},}
-            models.user_count = 2
-
-            models.all_rides = {}
-            models.ride_count = 1
-
-            models.all_requests = {}
-            models.request_count = 1
+            db.session.remove()
+            db.drop_all()

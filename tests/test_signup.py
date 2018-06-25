@@ -19,7 +19,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "mark", "email" : "mark@gmail.com",
             "password" : "secret12345", "confirm_password" : "secret12345"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
     def test_same_email_signup(self):
@@ -29,7 +29,7 @@ class SignupTests(BaseTests):
             "email" : "user@gmail.com",
             "password" : "12345678",
             "confirm_password" : "12345678"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_same_email_signup_driver(self):
@@ -41,7 +41,7 @@ class SignupTests(BaseTests):
             "confirm_password" : "123456789",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_diff_passwords(self):
@@ -49,7 +49,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "felix", "email" : "felix@gmail.com",
             "password" : "12345678", "confirm_password" : "passwordsecret"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_short_passwords(self):
@@ -57,7 +57,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "moses", "email" : "moses@gmail.com",
             "password" : "1234567", "confirm_password" : "1234567"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_username(self):
@@ -65,7 +65,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "", "email" : "emptyusername@gmail.com",
             "password" : "12345678", "confirm_password" : "12345678"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_invalid_email(self):
@@ -73,7 +73,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "lenny", "email" : "invalidemail.com",
             "password" : "secret12345", "confirm_password" : "secret12345"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_password(self):
@@ -81,7 +81,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "lenny", "email" : "lennymutush@gmail.com",
             "password" : "", "confirm_password" : "secret12345"})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_conf_password(self):
@@ -89,7 +89,7 @@ class SignupTests(BaseTests):
         data = json.dumps({
             "username" : "lenny", "email" : "confpassword@gmail.com",
             "password" : "secret", "confirm_password" : ""})
-        response = self.app.post('/api/v1/auth/userregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/userregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
 class DriverSignupTests(BaseTests):
@@ -103,7 +103,7 @@ class DriverSignupTests(BaseTests):
             "password" : "secret12345", "confirm_password" : "secret12345",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 201)
 
     def test_signup_diff_passwords(self):
@@ -113,7 +113,7 @@ class DriverSignupTests(BaseTests):
             "password" : "12345678", "confirm_password" : "passwordsecret",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_short_passwords(self):
@@ -123,7 +123,7 @@ class DriverSignupTests(BaseTests):
             "password" : "1234567", "confirm_password" : "1234567",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_username(self):
@@ -133,7 +133,7 @@ class DriverSignupTests(BaseTests):
             "password" : "12345678", "confirm_password" : "12345678",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_invalid_email(self):
@@ -143,7 +143,7 @@ class DriverSignupTests(BaseTests):
             "password" : "secret12345", "confirm_password" : "secret12345",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_password(self):
@@ -153,7 +153,7 @@ class DriverSignupTests(BaseTests):
             "password" : "", "confirm_password" : "secret12345",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
     def test_signup_empty_conf_password(self):
@@ -163,7 +163,7 @@ class DriverSignupTests(BaseTests):
             "password" : "secret", "confirm_password" : "",
             "numberplate" : "KBA 375X",
             "carmodel" : "Subaru"})
-        response = self.app.post('/api/v1/auth/driverregister', data=data, content_type='application/json')
+        response = self.app.post('/api/v2/auth/driverregister', data=data, content_type='application/json')
         self.assertEqual(response.status_code, 400)
 
 if __name__ == '__main__':
