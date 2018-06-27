@@ -21,14 +21,14 @@ def tables_creation():
         """ CREATE TABLE rides (
                        ride_id SERIAL PRIMARY KEY,
                        ride VARCHAR(155) NOT NULL,
-                       driver_id INTEGER NOT NULL,
+                       driver_id VARCHAR(50) NOT NULL,
                        departuretime VARCHAR(100) NOT NULL,
                        cost VARCHAR(100) NOT NULL,
-                       maximum INTEGER NOT NULL,
+                       maximum VARCHAR(100) NOT NULL,
                        status VARCHAR(100) NOT NULL)
         """,
         """ CREATE TABLE request (
-                       id SERIAL PRIMARY KEY,
+                       request_id SERIAL PRIMARY KEY,
                        user_id INTEGER NOT NULL,
                        ride_id INTEGER NOT NULL,
                        status VARCHAR(100) NOT NULL,
@@ -55,7 +55,7 @@ class User(object):
 
 
     @staticmethod
-    def create_user(username, email, password, usertype, carmodel=None, numberplate=None):
+    def create_user(username, email, password, usertype, carmodel="", numberplate=""):
         """Creates a new user and ensures that the email is unique"""
         db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
@@ -87,7 +87,7 @@ class User(object):
 
         for row in rows:
             if row[0] == user_id:
-                db_cursor.execute("UPDATE user SET username=%s, email=%s, password=%s, usertype=%s, carmodel=%s, numberplate=%s WHERE user_id=%s",
+                db_cursor.execute("UPDATE users SET username=%s, email=%s, password=%s, usertype=%s, carmodel=%s, numberplate=%s WHERE user_id=%s",
                                   (username, email, password, usertype, carmodel, numberplate, user_id))
                 return make_response(jsonify({"message" : "user has been successfully updated"}), 200)
 
@@ -97,27 +97,28 @@ class User(object):
     @staticmethod
     def delete_user(user_id):
         """Deletes a user"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         rows = db_cursor.fetchall()
-        for row in rows:
-            if row[0] == user_id:
-                db_cursor.execute("DELETE FROM user WHERE user_id=%s", (user_id,))
-                db_connection.commit()
-                db_connection.close()
-                return make_response(jsonify({"message" : "user has been successfully deleted"}), 200)
+        if rows != []:
+            for row in rows:
+                if row[0] == user_id:
+                    db_cursor.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
+                    db_connection.commit()
+                    db_connection.close()
+                    return make_response(jsonify({"message" : "user has been successfully deleted"}), 200)
         
         return make_response(jsonify({"message" : "user does not exists"}), 404)
 
     @staticmethod
     def get_user(user_id):
         """Gets a particular user"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
         user = db_cursor.fetchall()
-        if user != None:
+        if user != []:
             return make_response(jsonify({"profile" : user}), 200)
         return make_response(jsonify({"message" : "user does not exists"}), 404)
 
@@ -125,7 +126,7 @@ class User(object):
     @staticmethod
     def get_all_users():
         """Gets all users"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         users = db_cursor.fetchall()
@@ -159,10 +160,10 @@ class Ride(object):
         rows = db_cursor.fetchall()
         for row in rows:
             if row[0] == ride_id:
-                db_cursor.execute("UPDATE user SET ride=%s, driver_id=%s, departuretime=%s, cost=%s, maximum=%s WHERE ride_id=%s",
+                db_cursor.execute("UPDATE rides SET ride=%s, driver_id=%s, departuretime=%s, cost=%s, maximum=%s WHERE ride_id=%s",
                                   (ride, driver_id, departuretime, cost, maximum, ride_id))
-                return make_response(jsonify({"message" : "user has been successfully updated"}), 200)
-        return make_response(jsonify({"message" : "user does not exist"}), 404)
+                return make_response(jsonify({"message" : "ride has been successfully updated"}), 200)
+        return make_response(jsonify({"message" : "ride does not exist"}), 404)
 
 
     @staticmethod
@@ -175,7 +176,7 @@ class Ride(object):
         for row in rows:
             if row[0] == ride_id:
                 if row[2] == driver_id:
-                    db_cursor.execute("UPDATE user SET status=%s WHERE ride_id=%s",
+                    db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s",
                                     ("given", ride_id))
                     return {"message" : "ride has started"}
 
@@ -186,13 +187,13 @@ class Ride(object):
     @staticmethod
     def delete_ride(ride_id):
         """Deletes a ride"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
         rows = db_cursor.fetchall()
         for row in rows:
             if row[0] == ride_id:
-                db_cursor.execute("DELETE FROM user WHERE ride_id=%s", (ride_id,))
+                db_cursor.execute("DELETE FROM rides WHERE ride_id=%s", (ride_id,))
                 db_connection.commit()
                 db_connection.close()
                 return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
@@ -206,7 +207,7 @@ class Ride(object):
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
         ride = db_cursor.fetchall()
-        if ride != None:
+        if ride != []:
             return make_response(jsonify({"profile" : ride}), 200)
         return make_response(jsonify({"message" : "ride does not exists"}), 404)
         
@@ -227,10 +228,12 @@ class Request(object):
     @staticmethod
     def request_ride(ride_id, user_id, accepted=False, status="pending"):
         """Creates a new request"""
+        ride_id = str(ride_id)
+        user_id = str(user_id)
         db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         new_request = "INSERT INTO request (ride_id, user_id, accepted, status) VALUES " \
-                    "('" + ride_id + "', '" + user_id + "', '" + accepted + "', '" + status + "')"
+                    "('" + ride_id + "', '" + user_id + "', '" + '0' + "', '" + status + "')"
         db_cursor.execute(new_request)
         db_connection.commit()
         db_connection.close()
@@ -242,38 +245,38 @@ class Request(object):
         """Deletes a request"""
 
         try:
-            db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
             db_cursor = db_connection.cursor()
             db_cursor.execute("DELETE FROM request WHERE request_id=%s", (request_id,))
             db_connection.commit()
             db_connection.close()
             return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
-        except KeyError:
-            return {"message" : "the specified request does not exist in requests"}
+        except:
+            return make_response(jsonify({"message" : "the specified request does not exist in requests"}), 404)
     
     @staticmethod
     def update_request(request_id):
         """Accepts/rejects request"""
         try:
-            db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
             db_cursor = db_connection.cursor()
-            db_cursor.execute("UPDATE request SET status=%s, WHERE request_id=%s",
+            db_cursor.execute("UPDATE request SET status=%s WHERE request_id=%s",
                                   ("accepted", request_id))
             db_connection.commit()
             db_connection.close()
             return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
         except KeyError:
-            return {"message" : "the specified request does not exist in requests"}
+            return make_response(jsonify({"message" : "the specified request does not exist in requests"}), 404)
 
 
     @staticmethod
     def get_requests(request_id):
         """Gets a particular request"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
         request = db_cursor.fetchall()
-        if request != None:
+        if request != []:
             return make_response(jsonify({"profile" : request}), 200)
         return make_response(jsonify({"message" : "ride does not exists"}), 404)
 
@@ -281,7 +284,7 @@ class Request(object):
     @staticmethod
     def get_all_requests():
         """Gets all request"""
-        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request")
         requests = db_cursor.fetchall()
