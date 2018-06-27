@@ -13,8 +13,6 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import app
 import models
 
-db = models.db
-
 
 class BaseTests(unittest.TestCase):
     """Authenticate a user and an admin and make the tokens available. Create a ride and request"""
@@ -23,7 +21,7 @@ class BaseTests(unittest.TestCase):
     def setUp(self):
         self.application = app.create_app('config.TestingConfig')
         with self.application.app_context():
-            db.create_all()
+            models.tables_creation()
             admin_reg = models.User.create_user(username="admin",
                                                 email="admin@gmail.com",
                                                 password="admin1234",
