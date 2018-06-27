@@ -96,12 +96,12 @@ class RideTests(BaseTests):
 
     def test_deleting_non_existing(self):
         """Test deleting ride that does not exist"""
-        response = self.app.delete('/api/v2/rides/200', headers=self.driver_header)
+        response = self.app.delete('/api/v2/rides/200', headers=self.admin_header)
         self.assertEqual(response.status_code, 404)
     
     def test_start_ride(self):
         """Test starting a ride successfully"""
-        response = self.app.post('/api/v2/rides/1', headers=self.driver_header)
+        response = self.app.post('/api/v2/rides/3', headers=self.driver_header)
         self.assertEqual(response.status_code, 200)
     
     def test_unsuccessful_start_ride(self):

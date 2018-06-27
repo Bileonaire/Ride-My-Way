@@ -27,7 +27,7 @@ class UsersTest(BaseTests):
 
     def test_get_non_existing(self):
         """Test getting a user while providing non-existing id"""
-        response = self.app.get('/api/v2/users/27', headers=self.admin_header)
+        response = self.app.get('/api/v2/users/500', headers=self.admin_header)
         self.assertEqual(response.status_code, 404)
     
     def test_good_update(self):

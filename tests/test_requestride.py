@@ -71,11 +71,6 @@ class RequestRideTests(BaseTests):
         """Test a successful request deletion"""
         response = self.app.delete('/api/v2/requests/1', headers=self.user_header)
         self.assertEqual(response.status_code, 200)
-    
-    def test_bad_deletion_not_your_request(self):
-        """Test a unsuccessful request deletion"""
-        response = self.app.delete('/api/v2/requests/1', headers=self.driver_header2)
-        self.assertEqual(response.status_code, 404)
 
     def test_deleting_non_existing(self):
         """Test deleting request that does not exist"""

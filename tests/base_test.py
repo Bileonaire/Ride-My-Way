@@ -5,6 +5,7 @@ Set up required items to be used during testing
 import unittest
 import json
 from werkzeug.security import generate_password_hash
+import psycopg2
 
 import sys # fix import errors
 import os
@@ -75,7 +76,7 @@ class BaseTests(unittest.TestCase):
             '/api/v2/auth/driverregister', data=driver_reg,
             content_type='application/json')
         
-        register_driver = self.app.post(
+        register_driver2 = self.app.post(
             '/api/v2/auth/driverregister', data=driver_reg2,
             content_type='application/json')
 
@@ -136,5 +137,7 @@ class BaseTests(unittest.TestCase):
 
     def tearDown(self):
         with self.application.app_context():
-            db.session.remove()
-            db.drop_all()
+            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("DROP TABLE users, rides, request;")
+            db_connection.close()
