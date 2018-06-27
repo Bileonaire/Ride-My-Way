@@ -33,12 +33,13 @@ class RideList(Resource):
             location=['form', 'json'])
         self.reqparse.add_argument(
             'cost',
-            required=True,
+            required=False,
+            default="0",
             location=['form', 'json'])
         self.reqparse.add_argument(
             'maximum',
             required=True,
-            type=int,
+            type=str,
             help="kindly provide a valid integer of the maximum number of passengers",
             location=['form', 'json'])
         super().__init__()
@@ -51,8 +52,13 @@ class RideList(Resource):
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
+        ride = kwargs.get("departurepoint") + " to " +kwargs.get("destination")
 
-        result = models.Ride.create_ride(driver_id=driver_id, **kwargs)
+        result = models.Ride.create_ride(ride=ride,
+                                         driver_id=driver_id,
+                                         departuretime=kwargs.get("departuretime"),
+                                         cost=kwargs.get("cost"),
+                                         maximum=kwargs.get("maximum"))
         return result
 
     def get(self):
@@ -84,7 +90,8 @@ class Ride(Resource):
             location=['form', 'json'])
         self.reqparse.add_argument(
             'cost',
-            required=True,
+            required=False,
+            default="0",
             location=['form', 'json'])
         self.reqparse.add_argument(
             'maximum',
@@ -118,7 +125,13 @@ class Ride(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
-        result = models.Ride.update_ride(ride_id=ride_id, driver_id=driver_id, **kwargs)
+        ride = kwargs.get("departurepoint") + " to " +kwargs.get("destination")
+        result = models.Ride.update_ride(ride_id=ride_id,
+                                         ride=ride,
+                                         driver_id=driver_id,
+                                         departuretime=kwargs.get("departuretime"),
+                                         cost=kwargs.get("cost"),
+                                         maximum=kwargs.get("maximum"))
         return result
 
     @driver_admin_required
@@ -140,6 +153,26 @@ class RequestRide(Resource):
 
         result = models.Request.request_ride(ride_id=ride_id, user_id=user_id)
         return result
+
+    # @driver_required
+    # def get(self, ride_id):
+    #     """get a particular ride requests"""
+    #     result = models.Request.get_particular_riderequests(ride_id=ride_id)
+    #     return result
+
+# class UserRequests(Resource):
+#     """Contains POST method for requsting a particular ride"""
+
+#     @user_required
+#     def get(self, user_id):
+#         """get a particular user requests"""
+
+#         token = request.headers['x-access-token']
+#         data = jwt.decode(token, config.Config.SECRET_KEY)
+#         user_id = data['id']
+
+#         result = models.Request.get_particular_userrequests(user_id=user_id)
+#         return result
 
 
 class RequestList(Resource):
@@ -171,14 +204,14 @@ class Request(Resource):
         driver_id = data['id']
 
 
-        requesti = models.Request.query.filter_by(id=request_id).first()
-        if requesti != None:
-            if requesti.driver_id == driver_id:
-                update = models.Request.update_request(request_id)
-                return make_response(jsonify(update), 200)
-            return make_response(jsonify({
-                "message" : "the ride request you are updating is not of your ride"}), 404)
-        return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
+        # requesti = models.Request.query.filter_by(id=request_id).first()
+        # if requesti != None:
+        #     if requesti.driver_id == driver_id:
+        update = models.Request.update_request(request_id)
+        return make_response(jsonify(update), 200)
+        #     return make_response(jsonify({
+        #         "message" : "the ride request you are updating is not of your ride"}), 404)
+        # return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
 
     @user_required
     def delete(self, request_id):
@@ -188,19 +221,21 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         currentuser_id = data['id']
 
-        requesti = models.Request.query.filter_by(id=request_id).first()
-        if requesti != None:
-            if requesti.user_id == currentuser_id:
-                delete = models.Request.delete_request(request_id)
-                return make_response(jsonify(delete), 200)
-            return make_response(jsonify({
-                "message" : "the ride request you are deleting is not your request"}), 404)
-        return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
+        # requesti = models.Request.query.filter_by(id=request_id).first()
+        # if requesti != None:
+        #     if requesti.user_id == currentuser_id:
+        delete = models.Request.delete_request(request_id)
+        return make_response(jsonify(delete), 200)
+        #     return make_response(jsonify({
+        #         "message" : "the ride request you are deleting is not your request"}), 404)
+        # return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
 
 rides_api = Blueprint('resources.rides', __name__)
 api = Api(rides_api)
 api.add_resource(RideList, '/rides', endpoint='rides')
 api.add_resource(Ride, '/rides/<int:ride_id>', endpoint='ride')
 api.add_resource(RequestRide, '/rides/<int:ride_id>/requests', endpoint='requestride')
+# api.add_resource(UserRequests, '/users/<int:user_id>/requests', endpoint='userequests')
 api.add_resource(RequestList, '/requests', endpoint='requests')
 api.add_resource(Request, '/requests/<int:request_id>', endpoint='request')
+

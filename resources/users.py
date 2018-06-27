@@ -2,6 +2,7 @@
 """
 import datetime
 
+import psycopg2
 from flask import Blueprint, jsonify, make_response
 from flask_restful import Resource, Api, reqparse, inputs
 from werkzeug.security import check_password_hash
@@ -57,7 +58,7 @@ class User_Register(Resource):
                                                  email=kwargs.get('email'),
                                                  password=kwargs.get('password'),
                                                  usertype="user",
-                                                 carmodel=None, numberplate=None)
+                                                 carmodel="", numberplate="")
                 return result
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
@@ -147,24 +148,26 @@ class Login(Resource):
 
     def post(self):
         """login a user"""
-        kwargs = self.reqparse.parse_args()
-        by_email = models.User.query.filter_by(email=kwargs.get('email')).first()
-        if by_email == None:
+        try:
+            kwargs = self.reqparse.parse_args()
+            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get("email"),))
+            row = db_cursor.fetchall()
+            row = row[0]
+            db_connection.close()
+            if check_password_hash(row[3], kwargs.get("password")) == True:
+                token = jwt.encode({
+                    'id' : row[0],
+                    'usertype' : row[4],
+                    'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
+                                    config.Config.SECRET_KEY)
+
+                return make_response(jsonify({
+                    "message" : "successfully logged in",
+                    "token" : token.decode('UTF-8')}), 200)
+        except:
             return make_response(jsonify({"message" : "invalid email address or password"}), 400)
-
-        if check_password_hash(by_email.password, kwargs.get("password")) == True:
-            token = jwt.encode({
-                'id' : by_email.id,
-                'usertype' : by_email.usertype,
-                'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
-                                config.Config.SECRET_KEY)
-
-            return make_response(jsonify({
-                "message" : "successfully logged in",
-                "token" : token.decode('UTF-8')}), 200)
-        return make_response(jsonify({"message" : "invalid email address or password"}), 400)
-        
-
 
 
 class UserList(Resource):
@@ -219,11 +222,6 @@ class UserList(Resource):
     def post(self):
         """Register a new user or driver or admin"""
         kwargs = self.reqparse.parse_args()
-        by_email = models.User.query.filter_by(email=kwargs.get('email')).first()
-        if by_email is not None:
-            return make_response(jsonify({
-                "message" : "user with that email already exists"}), 400)
-
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
                 result = models.User.create_user(username=kwargs.get('username'),

@@ -85,7 +85,7 @@ def driver_admin_required(f):
 
     @wraps(f)
     def decorated(*args, **kwargs):
-        """validate token provided and ensures the user is a driver"""
+        """validate token provided and ensures the user is a driver or admin"""
         token = None
 
         if 'x-access-token' in request.headers:
