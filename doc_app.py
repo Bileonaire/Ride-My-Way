@@ -231,7 +231,7 @@ def create_ride():
         in: formData
         type: string
       - name: cost
-        required: true
+        required: false
         in: formData
         type: string
       - name: maximum
@@ -299,7 +299,7 @@ def update_ride():
         in: formData
         type: string
       - name: cost
-        required: true
+        required: false
         in: formData
         type: string
       - name: maximum
@@ -342,7 +342,37 @@ def request_ride():
       - name: ride_id
         required: true
         in: path
+        type: integer
+    """
+
+@app.route('/api/v2/rides/<int:ride_id>/requests', methods=["GET"])
+def get_ride_requests():
+    """ endpoint for getting requests of a perticular ride.
+    ---
+    parameters:
+      - name: x-access-token
+        in: header
         type: string
+        required: true
+      - name: ride_id
+        required: true
+        in: path
+        type: integer
+    """
+
+@app.route('/api/v2/users/<int:user_id>/requests', methods=["GET"])
+def get_user_requests():
+    """ endpoint for getting requests of a perticular user.
+    ---
+    parameters:
+      - name: x-access-token
+        in: header
+        type: string
+        required: true
+      - name: user_id
+        required: true
+        in: path
+        type: integer
     """
 
 @app.route("/api/v2/requests", methods=["GET"])
@@ -383,11 +413,11 @@ def update_request():
       - name: request_id
         required: true
         in: path
-        type: string
+        type: integer
     """
 
 @app.route('/api/v2/requests/<int:request_id>', methods=["DELETE"])
-def delete_borrowed():
+def delete_request():
     """ endpoint for deleting an existing request.
     ---
     parameters:
@@ -404,7 +434,7 @@ def delete_borrowed():
 @app.route('/')
 def hello_world():
     "test that flask app is running"
-    return "To view the docs visit: https://bileonaireclub.herokuapp.com/apidocs"
+    return "To view the docs visit: https://ride-my-way-v2.herokuapp.com/apidocs"
 
 
 if __name__ == "__main__":

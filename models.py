@@ -1,451 +1,288 @@
-"""Handles data storage for Users, books and borrowed books
+"""Handles data storage for Users, rides and requests
 """
 # pylint: disable=E1101
 import datetime
 
 from flask import make_response, jsonify
 from werkzeug.security import generate_password_hash
-from flask_sqlalchemy import SQLAlchemy
+import psycopg2
 
-db = SQLAlchemy()
+def tables_creation():
+    commands = ("""
+        CREATE TABLE users (
+            user_id SERIAL PRIMARY KEY,
+            email VARCHAR(150) NOT NULL UNIQUE,
+            username VARCHAR(100) NOT NULL,
+            password VARCHAR(450) NOT NULL,
+            usertype VARCHAR(100) NOT NULL,
+            carmodel VARCHAR(200) NULL,
+            numberplate VARCHAR(200) NULL)
+        """,
+        """ CREATE TABLE rides (
+                       ride_id SERIAL PRIMARY KEY,
+                       ride VARCHAR(155) NOT NULL,
+                       driver_id INTEGER NOT NULL,
+                       departuretime VARCHAR(100) NOT NULL,
+                       cost VARCHAR(100) NOT NULL,
+                       maximum INTEGER NOT NULL,
+                       status VARCHAR(100) NOT NULL)
+        """,
+        """ CREATE TABLE request (
+                       id SERIAL PRIMARY KEY,
+                       user_id INTEGER NOT NULL,
+                       ride_id INTEGER NOT NULL,
+                       status VARCHAR(100) NOT NULL,
+                       accepted BOOLEAN NOT NULL)
+        """
+        )
+    conn = None
+    try:
+        conn = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        cur = conn.cursor()
+        for command in commands:
+            cur.execute(command)
+        cur.close()
+        conn.commit()
+    except (Exception, psycopg2.DatabaseError) as error:
+        print(error)
+    finally:
+        if conn is not None:
+            conn.close()
 
 
-class User(db.Model):
+class User(object):
     """Contains user columns and methods to add, update and delete a user"""
 
 
-    __tablename__ = 'user'
-    id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.String(250), nullable=False)
-    email = db.Column(db.String(250), unique=True, nullable=False)
-    password = db.Column(db.String(250), nullable=False)
-    usertype = db.Column(db.String(250), nullable=False)
-    carmodel = db.Column(db.String(250), nullable=True)
-    numberplate = db.Column(db.String(250), nullable=True)
-
-    def __repr__(self):
-        return '<user {}>'.format(self.user)
-
-
-    @classmethod
-    def create_user(cls, username, email, password, usertype, carmodel=None, numberplate=None):
+    @staticmethod
+    def create_user(username, email, password, usertype, carmodel=None, numberplate=None):
         """Creates a new user and ensures that the email is unique"""
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM users")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[1] == email:
+                return make_response(jsonify({"message" : "user with that email already exists"}), 400)
 
-        by_email = cls.query.filter_by(email=email).first()
-
-        if by_email is None:
-            password = generate_password_hash(password, method='sha256')
-            new_user = cls(username=username, email=email, password=password, usertype=usertype,
-                           carmodel=carmodel, numberplate=numberplate)
-            db.session.add(new_user)
-            db.session.commit()
-            return make_response(jsonify({
-                "message" : "user has been successfully created",
-                str(new_user.id) : {"username" : new_user.username,
-                                    "email" : new_user.email, "password" : new_user.password,
-                                    "usertype" : new_user.usertype,
-                                    "carmodel" : new_user.carmodel,
-                                    "numberplate" : new_user.numberplate}}), 201)
+        password = generate_password_hash(password, method='sha256')
+        new_user = "INSERT INTO users (username, email, password, usertype, carmodel, numberplate) VALUES " \
+                    "('" + username + "', '" + email + "', '" + password + "', '" + usertype + "', '" + carmodel + "','" + numberplate + "' )"
+        db_cursor.execute(new_user)
+        db_connection.commit()
+        db_connection.close()
+        return make_response(jsonify({"message" : "user has been successfully created"}), 201)
                                     
 
-
-        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
-
-
     @staticmethod
-    def update_user(user_id, username, email, password, usertype, carmodel=None, numberplate=None):
+    def update_user(user_id, username, email, password, usertype, carmodel="", numberplate=""):
         """Updates user information"""
-        user = User.query.get(user_id)
-        by_email = User.query.filter_by(email=email).first()
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM users")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[1] == email:
+                return make_response(jsonify({"message" : "user with that email already exists"}), 400)
 
-        if user is None:
-            return make_response(jsonify({"message" : "user does not exists"}), 404)
+        for row in rows:
+            if row[0] == user_id:
+                db_cursor.execute("UPDATE user SET username=%s, email=%s, password=%s, usertype=%s, carmodel=%s, numberplate=%s WHERE user_id=%s",
+                                  (username, email, password, usertype, carmodel, numberplate, user_id))
+                return make_response(jsonify({"message" : "user has been successfully updated"}), 200)
 
-        if by_email is None:
-            user.username = username
-            user.email = email
-            user.password = generate_password_hash(password, method='sha256')
-            user.usertype = usertype
-            user.carmodel = carmodel
-            user.numberplate = numberplate
-            db.session.commit()
-
-            return make_response(jsonify({
-                "message" : "user has been successfully updated",
-                str(user.id) : {"username" : user.username,
-                                    "email" : user.email, "password" : user.password,
-                                    "usertype" : user.usertype,
-                                    "carmodel" : user.carmodel,
-                                    "numberplate" : user.numberplate}}), 200)
-
-        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+        return make_response(jsonify({"message" : "user does not exist"}), 404)
 
 
     @staticmethod
     def delete_user(user_id):
         """Deletes a user"""
-        user = User.query.filter_by(id=user_id).first()
-
-        if user is None:
-            return make_response(jsonify({"message" : "user does not exists"}), 404)
-
-        db.session.delete(user)
-        db.session.commit()
-        return make_response(jsonify({"message" : "user has been successfully deleted"}), 200)
-
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM users")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[0] == user_id:
+                db_cursor.execute("DELETE FROM user WHERE user_id=%s", (user_id,))
+                db_connection.commit()
+                db_connection.close()
+                return make_response(jsonify({"message" : "user has been successfully deleted"}), 200)
+        
+        return make_response(jsonify({"message" : "user does not exists"}), 404)
 
     @staticmethod
     def get_user(user_id):
         """Gets a particular user"""
-        user = User.query.filter_by(id=user_id).first()
-        all_rides = Ride.query.all()
-        all_requests = Request.query.all()
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
+        user = db_cursor.fetchall()
+        if user != None:
+            return make_response(jsonify({"profile" : user}), 200)
+        return make_response(jsonify({"message" : "user does not exists"}), 404)
 
-        if user is None:
-            return make_response(jsonify({"message" : "user does not exists"}), 404)
-        
-        if user.usertype == "driver":
-            profile = {user.id : {"Username" : user.username, "Email" : user.email,
-                                    "Usertype" : user.usertype,
-                                    "Car Model" : user.carmodel,
-                                    "Number Plate" : user.numberplate,
-                                    "Rides already given" : [], "Rides pending" : []}}
-            for ride in all_rides:
-                if ride.driver_id == user.id:
-                    trip = ride.departurepoint + " to " + ride.destination
-                    if ride.status == "given":
-                        profile[user.id]["Rides already given"].append(trip)
-                    profile[user.id]["Rides pending"].append(trip)
-        else:
-            profile = {user.id : {'username' : user.username, 'email' : user.email,
-                                    'usertype' : user.usertype,
-                                    'Rides already taken' : [],
-                                    'Rides pending' : [], 'Rides rejected' : []}}
-            for request in all_requests:
-                if request.user_id == user.id:
-                    riderequest = Ride.query.filter_by(id=request.ride_id).first()
-                    ride = riderequest.departurepoint + " to " + riderequest.destination
-                    if request.status == "taken":
-                        profile[user.id]["Rides already taken"].append(ride)
-                    if request.status == "pending":
-                        profile[user.id]["Rides pending"].append(ride)
-                    if request.status == "rejected":
-                        profile[user.id]["Rides rejected"].append(ride)
 
-        return make_response(jsonify(profile), 200)
-    
     @staticmethod
     def get_all_users():
         """Gets all users"""
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM users")
+        users = db_cursor.fetchall()
+        return make_response(jsonify({"all users" : users}), 200)
 
-        all_users = User.query.all()
-        all_rides = Ride.query.all()
-        all_requests = Request.query.all()
-
-        users = []
-        for user in all_users:
-
-            if user.usertype == "driver":
-                profile = {user.id : {"Username" : user.username, "Email" : user.email,
-                                        "Usertype" : user.usertype,
-                                        "Car Model" : user.carmodel,
-                                        "Number Plate" : user.numberplate,
-                                        "Rides already given" : [], "Rides pending" : []}}
-                for ride in all_rides:
-                    if ride.driver_id == user.id:
-                        trip = ride.departurepoint + " to " + ride.destination
-                        if ride.status == "given":
-                            profile[user.id]["Rides already given"].append(trip)
-                        profile[user.id]["Rides pending"].append(trip)
-            else:
-                profile = {user.id : {'username' : user.username, 'email' : user.email,
-                                        'usertype' : user.usertype,
-                                        'Rides already taken' : [],
-                                        'Rides pending' : [], 'Rides rejected' : []}}
-                for request in all_requests:
-                    if request.user_id == user.id:
-                        ride = Ride.query.filter_by(id=request.ride_id).first()
-                        ride = ride.departurepoint + " to " + ride.destination
-                        if request.status == "taken":
-                            profile[user.id]["Rides already taken"].append(ride)
-                        if request.status == "pending":
-                            profile[user.id]["Rides pending"].append(ride)
-                        if request.status == "rejected":
-                            profile[user.id]["Rides rejected"].append(ride)
-
-            users.append(profile)
-
-        return {"all_users" : users}
-
-class Ride(db.Model):
+class Ride(object):
     """Contains ride columns and methods to add, update and delete a ride"""
-    
-
-    __tablename__ = 'ride'
-    id = db.Column(db.Integer, primary_key=True)
-    departurepoint = db.Column(db.String(250), nullable=False)
-    destination = db.Column(db.String(250), nullable=False)
-    departuretime = db.Column(db.String(250), nullable=False)
-    cost = db.Column(db.String, nullable=False)
-    maximum = db.Column(db.Integer, nullable=False)
-    driver_id = db.Column(db.Integer, nullable=False)
-    status = db.Column(db.String(250), nullable=False)
 
 
-    def __repr__(self):
-        return '<ride {}>'.format(self.ride)
-
-
-    @classmethod
-    def create_ride(cls, departurepoint, destination, driver_id,
-                    departuretime, cost, maximum, status="pending"):
-        """Creates a new ride"""
-
-        new_ride = cls(departurepoint=departurepoint, destination=destination,
-                       driver_id=driver_id, departuretime=departuretime,
-                       cost=cost, maximum=maximum, status="pending")
-        db.session.add(new_ride)
-        db.session.commit()
-        return make_response(jsonify({
-            "message" : "ride has been successfully created",
-            str(new_ride.id) : {"trip" : new_ride.departurepoint + " to " + new_ride.destination,
-                                "driver_id": new_ride.driver_id,
-                                "departuretime": new_ride.departuretime,
-                                "cost": new_ride.cost, "maximum": new_ride.maximum,
-                                "passengers" : [], "status" : new_ride.status}}), 201)
 
     @staticmethod
-    def update_ride(ride_id, departurepoint, destination, driver_id, departuretime, cost,
+    def create_ride(ride, driver_id, departuretime, cost, maximum, status="pending"):
+        """Creates a new ride"""
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        new_ride = "INSERT INTO rides (ride, driver_id, departuretime, cost, maximum, status) VALUES " \
+                    "('" + ride + "', '" + driver_id + "', '" + departuretime + "', '" + cost + "','" + maximum + "','" + status + "' )"
+        db_cursor.execute(new_ride)
+        db_connection.commit()
+        db_connection.close()
+        return make_response(jsonify({"message" : "ride has been successfully created"}), 201)
+
+
+    @staticmethod
+    def update_ride(ride_id, ride, driver_id, departuretime, cost,
                     maximum):
         """Updates ride information"""
-        updateride = Ride.query.filter_by(id=ride_id).first()
-
-        if updateride is None:
-            return make_response(jsonify({"message" : "ride does not exists"}), 404)
-
-        updateride.departurepoint = departurepoint
-        updateride.destination = destination
-        updateride.driver_id = driver_id
-        updateride.departuretime = departuretime
-        updateride.cost = cost
-        updateride.maximum = maximum
-
-        db.session.commit()
-        passengers = []
-        requests = Request.query.filter_by(ride_id=updateride.id, accepted=True).all()
-        for request in requests:
-            user = User.query.filter_by(user_id=request.user_id).first()
-            passengers.append(user.username)
-
-        return make_response(jsonify({
-            "message" : "book has been successfully updated",
-            str(updateride.id) : {"trip" : updateride.departurepoint + " to " + updateride.destination,
-                                  "driver_id": updateride.driver_id,
-                                  "departuretime": updateride.departuretime,
-                                  "cost": updateride.cost, "maximum": updateride.maximum,
-                                  "passengers" : passengers, "status" : updateride.status}}), 200)
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM rides")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[0] == ride_id:
+                db_cursor.execute("UPDATE user SET ride=%s, driver_id=%s, departuretime=%s, cost=%s, maximum=%s WHERE ride_id=%s",
+                                  (ride, driver_id, departuretime, cost, maximum, ride_id))
+                return make_response(jsonify({"message" : "user has been successfully updated"}), 200)
+        return make_response(jsonify({"message" : "user does not exist"}), 404)
 
 
     @staticmethod
     def start_ride(ride_id, driver_id):
         """starts a ride"""
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM rides")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[0] == ride_id:
+                if row[2] == driver_id:
+                    db_cursor.execute("UPDATE user SET status=%s WHERE ride_id=%s",
+                                    ("given", ride_id))
+                    return {"message" : "ride has started"}
 
-        ride = Ride.query.filter_by(id=ride_id).first()
-        if ride != None:
+                return {"message" : "The ride you want to start is not your ride."}
 
-            if ride.driver_id == driver_id:
-                ride.status = "given"
-
-                requests = Request.query.filter_by(ride_id=ride.id).all()
-                for request in requests:
-                    if request.accepted is True:
-                        request.status = "taken"
-                    elif request.accepted is False:
-                        request.status = "rejected"
-                db.session.commit()
-
-                return {"message" : "ride has started"}
-
-            return {"message" : "The ride you want to start is not your ride."}
         return {"message" : "ride does not exist"}
 
     @staticmethod
     def delete_ride(ride_id):
         """Deletes a ride"""
-        ride = Ride.query.filter_by(id=ride_id).first()
-
-        if ride is None:
-            return make_response(jsonify({"message" : "ride does not exists"}), 404)
-
-        db.session.delete(ride)
-        db.session.commit()
-        return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM rides")
+        rows = db_cursor.fetchall()
+        for row in rows:
+            if row[0] == ride_id:
+                db_cursor.execute("DELETE FROM user WHERE ride_id=%s", (ride_id,))
+                db_connection.commit()
+                db_connection.close()
+                return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
+        return make_response(jsonify({"message" : "user does not exists"}), 404)
 
 
     @staticmethod
     def get_ride(ride_id):
         """Gets a particular ride"""
-        ride = Ride.query.get(ride_id)
-
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
+        ride = db_cursor.fetchall()
         if ride != None:
-            passengers = []
-            requests = Request.query.filter_by(ride_id=ride.id, accepted=True).all()
-            for request in requests:
-                user = User.query.filter_by(id=request.user_id).first()
-                passengers.append(user.username)
-
-            info = {str(ride.id) : {"trip" : ride.departurepoint + " to " + ride.destination,
-                                    "driver_id": ride.driver_id,
-                                    "departuretime": ride.departuretime,
-                                    "cost": ride.cost, "maximum": ride.maximum,
-                                    "passengers" : passengers, "status" : ride.status}}
-
-            return make_response(jsonify({ride.id : info}), 200)
-
+            return make_response(jsonify({"profile" : ride}), 200)
         return make_response(jsonify({"message" : "ride does not exists"}), 404)
         
     
     @staticmethod
     def get_all_rides():
         """Gets all rides"""
-        rides = Ride.query.all()
-        get_all = []
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM rides")
+        rides = db_cursor.fetchall()
+        return make_response(jsonify({"all rides" : rides}), 200)
 
-        for ride in rides:
-        
-            passengers = []
-            requests = Request.query.filter_by(ride_id=ride.id, accepted=True).all()
-            for request in requests:
-                user = User.query.filter_by(id=request.user_id).first()
-                passengers.append(user.username)
-
-                info = {str(ride.id) : {"trip" : ride.departurepoint + " to " + ride.destination,
-                                        "driver_id": ride.driver_id,
-                                        "departuretime": ride.departuretime,
-                                        "cost": ride.cost, "maximum": ride.maximum,
-                                        "passengers" : passengers, "status" : ride.status}}
-            
-                get_all.append(info)
-            
-
-        return make_response(jsonify({"All rides" : get_all}), 200)
-
-
-class Request(db.Model):
+class Request(object):
     """Contains menu columns and methods to add, update and delete a request"""
-   
-    __tablename__ = 'request'
-    id = db.Column(db.Integer, primary_key=True)
-    ride_id = db.Column(db.Integer, nullable=False)
-    driver_id = db.Column(db.Integer, nullable=False)
-    user_id = db.Column(db.Integer, nullable=False)
-    accepted = db.Column(db.Boolean)
-    status = db.Column(db.String(250), nullable=False)
-
-        
-    def __repr__(self):
-        return '<request {}>'.format(self.request)
 
 
-    @classmethod
-    def request_ride(cls, ride_id, user_id, accepted=False, status="pending"):
+    @staticmethod
+    def request_ride(ride_id, user_id, accepted=False, status="pending"):
         """Creates a new request"""
-        ride = Ride.query.filter_by(id=ride_id).first()
-        if ride == None or ride.status == "given":
-            return make_response(jsonify({"message" : "the ride is not available for request"}), 404)
-
-
-        new_request = cls(ride_id=ride_id, user_id=user_id,
-                            accepted=False, status="pending", driver_id=ride.driver_id)
-        db.session.add(new_request)
-        db.session.commit()
-
-    
-        return make_response(jsonify({"message" : "request has been successfully sent for approval",
-                                    str(new_request.id) : {"ride_id" : new_request.ride_id,
-                                                            "user_id": new_request.user_id,
-                                                            "accepted": new_request.accepted,
-                                                            "status" : new_request.status}}), 201)
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        new_request = "INSERT INTO request (ride_id, user_id, accepted, status) VALUES " \
+                    "('" + ride_id + "', '" + user_id + "', '" + accepted + "', '" + status + "')"
+        db_cursor.execute(new_request)
+        db_connection.commit()
+        db_connection.close()
+        return make_response(jsonify({"message" : "request has been successfully sent for approval"}), 201)
             
-        
 
     @staticmethod
     def delete_request(request_id):
         """Deletes a request"""
 
         try:
-            request = Request.query.filter_by(id=request_id).first()
-            db.session.delete(request)
-            db.session.commit()
+            db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("DELETE FROM request WHERE request_id=%s", (request_id,))
+            db_connection.commit()
+            db_connection.close()
+            return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
         except KeyError:
             return {"message" : "the specified request does not exist in requests"}
     
     @staticmethod
     def update_request(request_id):
         """Accepts/rejects request"""
+        try:
+            db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+            db_cursor = db_connection.cursor()
+            db_cursor.execute("UPDATE request SET status=%s, WHERE request_id=%s",
+                                  ("accepted", request_id))
+            db_connection.commit()
+            db_connection.close()
+            return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
+        except KeyError:
+            return {"message" : "the specified request does not exist in requests"}
 
-        request = Request.query.get(request_id)
-        ride = Ride.query.filter_by(id=request.ride_id).first()
-
-        maximum = int(ride.maximum)
-        passengers = []
-        requests = Request.query.filter_by(ride_id=request.ride_id, accepted=True).all()
-        for request in requests:
-            user = User.query.filter_by(user_id=request.user_id).first()
-            passengers.append(user.username)
-        
-        if len(passengers) < maximum:
-            if request.accepted is False:
-                request.accepted = True
-                db.session.commit()
-                return {"message" : "the request has been accepted"}
-
-            elif request.accepted is True:
-                request.accepted = False
-                db.session.commit()
-                return {"message" : "the request has been rejected"}
-        else:
-            if request.accepted is True:
-                request.accepted = False
-                db.session.commit()
-                return {"message" : "the request has been rejected"}
-            return {"message" : "the ride has reached its maximum number of passengers"}
 
     @staticmethod
     def get_requests(request_id):
         """Gets a particular request"""
-        request = Request.query.filter_by(id=request_id).first()
-
-        if request is None:
-            return make_response(jsonify({"message" : "request does not exists"}), 404)
-        
-        user = User.query.filter_by(id=request.user_id).first()
-        ride = Ride.query.filter_by(id=request.ride_id).first()
-
-        info = {request.id : {"username" : user.username,
-                "ride": ride.departurepoint + " to " + ride.destination,
-                "driver_id" : ride.driver_id, "accepted": request.accepted,
-                "status" : request.status}}
-
-        return make_response(jsonify({"request" : info}), 200)
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
+        request = db_cursor.fetchall()
+        if request != None:
+            return make_response(jsonify({"profile" : request}), 200)
+        return make_response(jsonify({"message" : "ride does not exists"}), 404)
 
 
     @staticmethod
     def get_all_requests():
         """Gets all request"""
-        requests = Request.query.all()
-
-        if requests != None:
-            request_list = []
-            for request in requests:
-                request = Request.query.filter_by(id=request.id).first()
-                user = User.query.filter_by(id=request.user_id).first()
-                ride = Ride.query.filter_by(id=request.ride_id).first()
-                info = {request.id : {"username" : user.username,
-                                      "ride": ride.departurepoint + " to " + ride.destination,
-                                      "driver_id" : ride.driver_id, "accepted": request.accepted,
-                                      "status" : request.status}}
-                request_list.append(info)
-
-            return make_response(jsonify({"all_requests" : request_list}), 200)
-        return make_response(jsonify({"message" : "there are no requests"}), 404)
+        db_connection = psycopg2.connect("dbname='database' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request")
+        requests = db_cursor.fetchall()
+        return make_response(jsonify({"all requests" : requests}), 200)

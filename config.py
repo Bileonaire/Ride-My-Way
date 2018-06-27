@@ -4,8 +4,6 @@ from os import getenv
 # import os
 # basedir = os.path.abspath(os.path.dirname(__file__))
 # SQLALCHEMY_DATABASE_URI = 'sqlite:///' + os.path.join(basedir, 'testing.db')
-
-
 class Config(object):
     """Base class with all the constant config variables"""
     DEBUG = False
@@ -30,4 +28,3 @@ class DevelopmentConfig(Config):
 class ProductionConfig(Config):
     """Contains additional config variables required during production"""
     DEBUG = False
-    SQLALCHEMY_DATABASE_URI = getenv('PRODUCTION_DATABASE_URI')   
