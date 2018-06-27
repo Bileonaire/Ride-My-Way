@@ -4,11 +4,10 @@ import os
 import datetime
 
 from flask import Flask
-# pylint: disable=W0612
+
 from resources.users import users_api
 from resources.rides import rides_api
-
-from models import db
+from models import tables_creation
 
 
 def create_app(configuration):
@@ -19,12 +18,11 @@ def create_app(configuration):
 
     app.register_blueprint(users_api, url_prefix='/api/v2')
     app.register_blueprint(rides_api, url_prefix='/api/v2')
-    db.init_app(app)
 
     return app
 
 app = create_app('config.ProductionConfig')
-
+tables_creation()
 
 @app.route('/')
 def hello_world():
