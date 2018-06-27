@@ -11,8 +11,6 @@ import jwt
 import models
 import config
 from .auth import admin_required
-
-
 class User_Register(Resource):
     "Contains a POST method to register a new user"
 

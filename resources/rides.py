@@ -3,6 +3,7 @@
 from flask import request, jsonify, Blueprint, make_response
 from flask_restful import Resource, Api, reqparse
 import jwt
+import psycopg2
 # pylint: disable=W0612
 
 import models
@@ -51,8 +52,8 @@ class RideList(Resource):
 
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = data['id']
-        ride = kwargs.get("departurepoint") + " to " +kwargs.get("destination")
+        driver_id = str(data['id'])
+        ride = kwargs.get("departurepoint") + " to " + kwargs.get("destination")
 
         result = models.Ride.create_ride(ride=ride,
                                          driver_id=driver_id,
@@ -109,7 +110,7 @@ class Ride(Resource):
         """start a particular ride"""
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = data['id']
+        driver_id = str(data['id'])
 
         result = models.Ride.start_ride(ride_id=ride_id, driver_id=driver_id)
         if result == {"message" : "ride has started"}:
@@ -203,15 +204,16 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
+        requests = db_cursor.fetchall()
+        db_connection.close()
+        if requests != []:
+            update = models.Request.update_request(request_id)
+            return update
+        return make_response(jsonify({"message" : "request does not exists"}), 404)
 
-        # requesti = models.Request.query.filter_by(id=request_id).first()
-        # if requesti != None:
-        #     if requesti.driver_id == driver_id:
-        update = models.Request.update_request(request_id)
-        return make_response(jsonify(update), 200)
-        #     return make_response(jsonify({
-        #         "message" : "the ride request you are updating is not of your ride"}), 404)
-        # return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
 
     @user_required
     def delete(self, request_id):
@@ -221,14 +223,16 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         currentuser_id = data['id']
 
-        # requesti = models.Request.query.filter_by(id=request_id).first()
-        # if requesti != None:
-        #     if requesti.user_id == currentuser_id:
-        delete = models.Request.delete_request(request_id)
-        return make_response(jsonify(delete), 200)
-        #     return make_response(jsonify({
-        #         "message" : "the ride request you are deleting is not your request"}), 404)
-        # return make_response(jsonify({"message" : "the ride request does not exist"}), 404)
+        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
+        requests = db_cursor.fetchall()
+        db_connection.close()
+        if requests != []:
+            delete = models.Request.delete_request(request_id)
+            return delete
+        return make_response(jsonify({"message" : "request does not exists"}), 404)
+
 
 rides_api = Blueprint('resources.rides', __name__)
 api = Api(rides_api)

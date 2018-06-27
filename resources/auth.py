@@ -93,10 +93,13 @@ def driver_admin_required(f):
 
         try:
             data = jwt.decode(token, config.Config.SECRET_KEY)
-            if data['usertype'] == "driver" or data['usertype'] == "admin":
-                return f(*args, **kwargs)
+            if data['usertype'] != "driver" and data['usertype'] != "admin":
+                return make_response(jsonify({
+                    "message" : "Not authorized to perform this function as a non-driver"}), 401)
         except:
             return make_response(jsonify({
                 "message" : "kindly provide a valid token in the header"}), 401)
+
+        return f(*args, **kwargs)
 
     return decorated
