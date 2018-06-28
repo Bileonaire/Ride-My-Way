@@ -155,25 +155,11 @@ class RequestRide(Resource):
         result = models.Request.request_ride(ride_id=ride_id, user_id=user_id)
         return result
 
-    # @driver_required
-    # def get(self, ride_id):
-    #     """get a particular ride requests"""
-    #     result = models.Request.get_particular_riderequests(ride_id=ride_id)
-    #     return result
-
-# class UserRequests(Resource):
-#     """Contains POST method for requsting a particular ride"""
-
-#     @user_required
-#     def get(self, user_id):
-#         """get a particular user requests"""
-
-#         token = request.headers['x-access-token']
-#         data = jwt.decode(token, config.Config.SECRET_KEY)
-#         user_id = data['id']
-
-#         result = models.Request.get_particular_userrequests(user_id=user_id)
-#         return result
+    @driver_required
+    def get(self, ride_id):
+        """get a particular ride requests"""
+        result = models.Request.get_particular_riderequests(ride_id=ride_id)
+        return result
 
 
 class RequestList(Resource):
@@ -239,7 +225,6 @@ api = Api(rides_api)
 api.add_resource(RideList, '/rides', endpoint='rides')
 api.add_resource(Ride, '/rides/<int:ride_id>', endpoint='ride')
 api.add_resource(RequestRide, '/rides/<int:ride_id>/requests', endpoint='requestride')
-# api.add_resource(UserRequests, '/users/<int:user_id>/requests', endpoint='userequests')
 api.add_resource(RequestList, '/requests', endpoint='requests')
 api.add_resource(Request, '/requests/<int:request_id>', endpoint='request')
 
