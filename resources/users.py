@@ -11,6 +11,7 @@ import jwt
 import models
 import config
 from .auth import admin_required
+from models import db
 class User_Register(Resource):
     "Contains a POST method to register a new user"
 
@@ -148,7 +149,7 @@ class Login(Resource):
         """login a user"""
         try:
             kwargs = self.reqparse.parse_args()
-            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+            db_connection = psycopg2.connect(db)
             db_cursor = db_connection.cursor()
             db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get("email"),))
             row = db_cursor.fetchall()

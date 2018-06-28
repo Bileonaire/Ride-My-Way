@@ -9,7 +9,7 @@ import psycopg2
 import models
 import config
 from .auth import user_required, driver_required, driver_admin_required
-
+from models import db
 
 class RideList(Resource):
     """Contains GET and POST methods"""
@@ -204,7 +204,7 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         driver_id = data['id']
 
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
         requests = db_cursor.fetchall()
@@ -223,7 +223,7 @@ class Request(Resource):
         data = jwt.decode(token, config.Config.SECRET_KEY)
         currentuser_id = data['id']
 
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
         requests = db_cursor.fetchall()
