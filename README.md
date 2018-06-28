@@ -1,5 +1,5 @@
-[![Build Status](https://travis-ci.org/Bileonaire/Ride-My-Way.svg?branch=Develop-V2-API)](https://travis-ci.org/Bileonaire/Ride-My-Way)
-[![Coverage Status](https://coveralls.io/repos/github/Bileonaire/Ride-My-Way/badge.svg?branch=Develop-V1-API)](https://coveralls.io/github/Bileonaire/Ride-My-Way?branch=Develop-V1-API)
+[![Build Status](https://travis-ci.org/Bileonaire/Ride-My-Way.svg?branch=Develop-V3-API)](https://travis-ci.org/Bileonaire/Ride-My-Way)
+[![Coverage Status](https://coveralls.io/repos/github/Bileonaire/Ride-My-Way/badge.svg?branch=Develop-V3-API)](https://coveralls.io/github/Bileonaire/Ride-My-Way?branch=Develop-V3-API)
 [![PEP8](https://img.shields.io/badge/code%20style-pep8-green.svg)](https://www.python.org/dev/peps/pep-0008/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](https://opensource.org/licenses/MIT)
 
