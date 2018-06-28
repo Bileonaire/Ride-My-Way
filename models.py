@@ -13,47 +13,16 @@ db = config.TestingConfig.db
 
 
 def tables_creation():
-    commands = ("""
-        CREATE TABLE IF NOT EXISTS users (
-            user_id SERIAL PRIMARY KEY,
-            email VARCHAR(150) NOT NULL UNIQUE,
-            username VARCHAR(100) NOT NULL,
-            password VARCHAR(450) NOT NULL,
-            usertype VARCHAR(100) NOT NULL,
-            carmodel VARCHAR(200) NULL,
-            numberplate VARCHAR(200) NULL)
-        """,
-        """ CREATE TABLE IF NOT EXISTS rides (
-                       ride_id SERIAL PRIMARY KEY,
-                       ride VARCHAR(155) NOT NULL,
-                       driver_id VARCHAR(50) NOT NULL,
-                       departuretime VARCHAR(100) NOT NULL,
-                       cost VARCHAR(100) NOT NULL,
-                       maximum VARCHAR(100) NOT NULL,
-                       status VARCHAR(100) NOT NULL)
-        """,
-        """ CREATE TABLE IF NOT EXISTS request (
-                       request_id SERIAL PRIMARY KEY,
-                       user_id INTEGER NOT NULL,
-                       ride_id INTEGER NOT NULL,
-                       status VARCHAR(100) NOT NULL,
-                       accepted BOOLEAN NOT NULL)
-        """
-        )
-    conn = None
-    try:
-        conn = psycopg2.connect(db)
-        cur = conn.cursor()
-        for command in commands:
-            cur.execute(command)
-        cur.close()
-        conn.commit()
-    except (Exception, psycopg2.DatabaseError) as error:
-        print(error)
-    finally:
-        if conn is not None:
-            conn.close()
-
+    db_connection = psycopg2.connect(db)
+    db_cursor = db_connection.cursor()
+    db_cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id SERIAL PRIMARY KEY, email VARCHAR(150) NOT NULL UNIQUE, username VARCHAR(100) NOT NULL, "\
+                    " carmodel VARCHAR(200) NULL, numberplate VARCHAR(200) NULL)")
+    db_cursor.execute("CREATE TABLE IF NOT EXISTS rides (ride_id SERIAL PRIMARY KEY, ride VARCHAR(155) NOT NULL, driver_id VARCHAR(50) NOT NULL, " \
+                    " departuretime VARCHAR(100) NOT NULL, cost VARCHAR(100) NOT NULL, maximum VARCHAR(100) NOT NULL, status VARCHAR(100) NOT NULL)")
+    db_cursor.execute("CREATE TABLE IF NOT EXISTS request (request_id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, ride_id INTEGER NOT NULL, " \
+                    " status VARCHAR(100) NOT NULL, accepted BOOLEAN NOT NULL)")
+    db_connection.commit()
+    db_connection.close()
 
 class User(object):
     """Contains user columns and methods to add, update and delete a user"""
