@@ -139,5 +139,6 @@ class BaseTests(unittest.TestCase):
         with self.application.app_context():
             db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
             db_cursor = db_connection.cursor()
-            db_cursor.execute("DROP TABLE users, rides, request;")
+            db_cursor.execute('DROP TABLE "users", "rides","request";')
+            db_connection.commit()
             db_connection.close()

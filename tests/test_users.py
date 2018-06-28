@@ -52,7 +52,7 @@ class UsersTests(BaseTests):
     def test_good_user_creation(self):
         """Tests successfully creating a new user"""
         data = json.dumps({
-            "username" : "mark444", "email" : "mkiii@gmail.com",
+            "username" : "mark444", "email" : "messsiii@gmail.com",
             "password" : "secret12345", "confirm_password" : "secret12345", "usertype" : "user"})
         response = self.app.post(
             '/api/v2/users', data=data,
@@ -62,7 +62,7 @@ class UsersTests(BaseTests):
     def test_unmatching_password(self):
         """Tests unsuccessfully creating a new user"""
         data = json.dumps({
-            "username" : "mark444", "email" : "mkiii@gmail.com",
+            "username" : "mark444", "email" : "testing@gmail.com",
             "password" : "secrenotmatch", "confirm_password" : "secret12345", "usertype" : "user"})
         response = self.app.post(
             '/api/v2/users', data=data,

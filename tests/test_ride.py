@@ -88,6 +88,12 @@ class RideTests(BaseTests):
         """Test a successful ride deletion"""
         response = self.app.delete('/api/v2/rides/1', headers=self.driver_header)
         self.assertEqual(response.status_code, 200)
+    
+    
+    def test_unsuccess_user_deleting_ride(self):
+        """Test a successful ride deletion"""
+        response = self.app.delete('/api/v2/rides/3', headers=self.user_header)
+        self.assertEqual(response.status_code, 401)
 
     def test_no_header(self):
         """Test a unsuccessful ride deletion"""
@@ -101,7 +107,7 @@ class RideTests(BaseTests):
     
     def test_start_ride(self):
         """Test starting a ride successfully"""
-        response = self.app.post('/api/v2/rides/3', headers=self.driver_header)
+        response = self.app.post('/api/v2/rides/2', headers=self.driver_header)
         self.assertEqual(response.status_code, 200)
     
     def test_unsuccessful_start_ride(self):
