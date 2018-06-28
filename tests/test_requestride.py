@@ -38,6 +38,16 @@ class RequestRideTests(BaseTests):
         """Tests user successfully getting a request"""
         response = self.app.get('/api/v2/requests/2', headers=self.user_header)
         self.assertEqual(response.status_code, 200)
+    
+    def test__get_ride_requests(self):
+        """Tests user successfully getting a ride request"""
+        response = self.app.get('/api/v2/rides/1/requests', headers=self.driver_header)
+        self.assertEqual(response.status_code, 200)
+
+    def test_unsuccessful_get_ride_requests(self):
+        """Tests user successfully getting a ride request"""
+        response = self.app.get('/api/v2/rides/500/requests', headers=self.driver_header)
+        self.assertEqual(response.status_code, 404)
 
     def test_get_non_existing(self):
         """Test getting a request while providing non-existing id"""
