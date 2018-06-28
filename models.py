@@ -11,26 +11,6 @@ import config
 
 db = config.TestingConfig.db
 
-
-def tables_creation():
-    tables = ("""CREATE TABLE IF NOT EXISTS users (user_id SERIAL PRIMARY KEY, email VARCHAR(150) NOT NULL UNIQUE,
-                                                   username VARCHAR(100) NOT NULL, password VARCHAR(450) NOT NULL,
-                                                   usertype VARCHAR(100) NOT NULL, carmodel VARCHAR(200) NULL,
-                                                   numberplate VARCHAR(200) NULL)""",
-              """ CREATE TABLE IF NOT EXISTS rides (ride_id SERIAL PRIMARY KEY, ride VARCHAR(155) NOT NULL,
-                                                    driver_id VARCHAR(50) NOT NULL, departuretime VARCHAR(100) NOT NULL,
-                                                    cost VARCHAR(100) NOT NULL, maximum VARCHAR(100) NOT NULL,
-                                                    status VARCHAR(100) NOT NULL)""",
-              """ CREATE TABLE IF NOT EXISTS request (request_id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL,
-                                                      ride_id INTEGER NOT NULL, status VARCHAR(100) NOT NULL,
-                                                      accepted BOOLEAN NOT NULL)""")
-    conn = psycopg2.connect(db)
-    cur = conn.cursor()
-    for table in tables:
-        cur.execute(table)
-    cur.close()
-    conn.commit()
-
 class User(object):
     """Contains user columns and methods to add, update and delete a user"""
 
@@ -323,3 +303,23 @@ class Request(object):
                                     "accepted": request[4]}}
             ride_requests.append(info)
         return make_response(jsonify({"ride_requests" : ride_requests}), 200)
+
+
+def tables_creation():
+    tables = ("""CREATE TABLE IF NOT EXISTS users (user_id SERIAL PRIMARY KEY, email VARCHAR(150) NOT NULL UNIQUE,
+                                                   username VARCHAR(100) NOT NULL, password VARCHAR(450) NOT NULL,
+                                                   usertype VARCHAR(100) NOT NULL, carmodel VARCHAR(200) NULL,
+                                                   numberplate VARCHAR(200) NULL)""",
+              """ CREATE TABLE IF NOT EXISTS rides (ride_id SERIAL PRIMARY KEY, ride VARCHAR(155) NOT NULL,
+                                                    driver_id VARCHAR(50) NOT NULL, departuretime VARCHAR(100) NOT NULL,
+                                                    cost VARCHAR(100) NOT NULL, maximum VARCHAR(100) NOT NULL,
+                                                    status VARCHAR(100) NOT NULL)""",
+              """ CREATE TABLE IF NOT EXISTS request (request_id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL,
+                                                      ride_id INTEGER NOT NULL, status VARCHAR(100) NOT NULL,
+                                                      accepted BOOLEAN NOT NULL)""")
+    conn = psycopg2.connect(db)
+    cur = conn.cursor()
+    for table in tables:
+        cur.execute(table)
+    cur.close()
+    conn.commit()
