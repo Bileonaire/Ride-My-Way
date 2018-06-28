@@ -13,16 +13,23 @@ db = config.TestingConfig.db
 
 
 def tables_creation():
-    db_connection = psycopg2.connect(db)
-    db_cursor = db_connection.cursor()
-    db_cursor.execute("CREATE TABLE IF NOT EXISTS users (user_id SERIAL PRIMARY KEY, email VARCHAR(150) NOT NULL UNIQUE, username VARCHAR(100) NOT NULL, "\
-                    " carmodel VARCHAR(200) NULL, numberplate VARCHAR(200) NULL)")
-    db_cursor.execute("CREATE TABLE IF NOT EXISTS rides (ride_id SERIAL PRIMARY KEY, ride VARCHAR(155) NOT NULL, driver_id VARCHAR(50) NOT NULL, " \
-                    " departuretime VARCHAR(100) NOT NULL, cost VARCHAR(100) NOT NULL, maximum VARCHAR(100) NOT NULL, status VARCHAR(100) NOT NULL)")
-    db_cursor.execute("CREATE TABLE IF NOT EXISTS request (request_id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL, ride_id INTEGER NOT NULL, " \
-                    " status VARCHAR(100) NOT NULL, accepted BOOLEAN NOT NULL)")
-    db_connection.commit()
-    db_connection.close()
+    tables = ("""CREATE TABLE IF NOT EXISTS users (user_id SERIAL PRIMARY KEY, email VARCHAR(150) NOT NULL UNIQUE,
+                                                   username VARCHAR(100) NOT NULL, password VARCHAR(450) NOT NULL,
+                                                   usertype VARCHAR(100) NOT NULL, carmodel VARCHAR(200) NULL,
+                                                   numberplate VARCHAR(200) NULL)""",
+              """ CREATE TABLE IF NOT EXISTS rides (ride_id SERIAL PRIMARY KEY, ride VARCHAR(155) NOT NULL,
+                                                    driver_id VARCHAR(50) NOT NULL, departuretime VARCHAR(100) NOT NULL,
+                                                    cost VARCHAR(100) NOT NULL, maximum VARCHAR(100) NOT NULL,
+                                                    status VARCHAR(100) NOT NULL)""",
+              """ CREATE TABLE IF NOT EXISTS request (request_id SERIAL PRIMARY KEY, user_id INTEGER NOT NULL,
+                                                      ride_id INTEGER NOT NULL, status VARCHAR(100) NOT NULL,
+                                                      accepted BOOLEAN NOT NULL)""")
+    conn = psycopg2.connect(db)
+    cur = conn.cursor()
+    for table in tables:
+        cur.execute(table)
+    cur.close()
+    conn.commit()
 
 class User(object):
     """Contains user columns and methods to add, update and delete a user"""
@@ -34,9 +41,9 @@ class User(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
-        rows = db_cursor.fetchall()
-        for row in rows:
-            if row[1] == email:
+        users = db_cursor.fetchall()
+        for user in users:
+            if user[1] == email:
                 return make_response(jsonify({"message" : "user with that email already exists"}), 400)
 
         password = generate_password_hash(password, method='sha256')
@@ -54,13 +61,13 @@ class User(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
-        rows = db_cursor.fetchall()
-        for row in rows:
-            if row[1] == email:
+        users = db_cursor.fetchall()
+        for user in users:
+            if user[1] == email:
                 return make_response(jsonify({"message" : "user with that email already exists"}), 400)
 
-        for row in rows:
-            if row[0] == user_id:
+        for user in users:
+            if user[0] == user_id:
                 db_cursor.execute("UPDATE users SET username=%s, email=%s, password=%s, usertype=%s, carmodel=%s, numberplate=%s WHERE user_id=%s",
                                   (username, email, password, usertype, carmodel, numberplate, user_id))
                 return make_response(jsonify({"message" : "user has been successfully updated"}), 200)
@@ -74,10 +81,10 @@ class User(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
-        rows = db_cursor.fetchall()
-        if rows != []:
-            for row in rows:
-                if row[0] == user_id:
+        users = db_cursor.fetchall()
+        if users != []:
+            for user in users:
+                if user[0] == user_id:
                     db_cursor.execute("DELETE FROM users WHERE user_id=%s", (user_id,))
                     db_connection.commit()
                     db_connection.close()
@@ -124,7 +131,6 @@ class Ride(object):
     """Contains ride columns and methods to add, update and delete a ride"""
 
 
-
     @staticmethod
     def create_ride(ride, driver_id, departuretime, cost, maximum, status="pending"):
         """Creates a new ride"""
@@ -145,9 +151,9 @@ class Ride(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
-        rows = db_cursor.fetchall()
-        for row in rows:
-            if row[0] == ride_id:
+        rides = db_cursor.fetchall()
+        for ride in rides:
+            if ride[0] == ride_id:
                 db_cursor.execute("UPDATE rides SET ride=%s, driver_id=%s, departuretime=%s, cost=%s, maximum=%s WHERE ride_id=%s",
                                   (ride, driver_id, departuretime, cost, maximum, ride_id))
                 return make_response(jsonify({"message" : "ride has been successfully updated"}), 200)
@@ -160,12 +166,11 @@ class Ride(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
-        rows = db_cursor.fetchall()
-        if rows != []:
-            row = rows[0]
-            if int(row[2]) == driver_id:
-                db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s",
-                                ("given", ride_id))
+        ride = db_cursor.fetchall()
+        if ride != []:
+            ride = ride[0]
+            if int(ride[2]) == driver_id:
+                db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s", ("given", ride_id))
                 db_connection.commit()
                 db_connection.close()
                 return {"message" : "ride has started"}
@@ -180,9 +185,9 @@ class Ride(object):
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
-        rows = db_cursor.fetchall()
-        for row in rows:
-            if row[0] == ride_id:
+        rides = db_cursor.fetchall()
+        for ride in rides:
+            if ride[0] == ride_id:
                 db_cursor.execute("DELETE FROM rides WHERE ride_id=%s", (ride_id,))
                 db_connection.commit()
                 db_connection.close()
@@ -266,8 +271,7 @@ class Request(object):
         try:
             db_connection = psycopg2.connect(db)
             db_cursor = db_connection.cursor()
-            db_cursor.execute("UPDATE request SET status=%s WHERE request_id=%s",
-                                  ("accepted", request_id))
+            db_cursor.execute("UPDATE request SET status=%s WHERE request_id=%s", ("accepted", request_id))
             db_connection.commit()
             db_connection.close()
             return make_response(jsonify({"message" : "request has been successfully accepted"}), 200)
