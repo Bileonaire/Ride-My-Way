@@ -7,9 +7,14 @@ from flask import make_response, jsonify
 from werkzeug.security import generate_password_hash
 import psycopg2
 
+import config
+
+db = config.TestingConfig.db
+
+
 def tables_creation():
     commands = ("""
-        CREATE TABLE users (
+        CREATE TABLE IF NOT EXISTS users (
             user_id SERIAL PRIMARY KEY,
             email VARCHAR(150) NOT NULL UNIQUE,
             username VARCHAR(100) NOT NULL,
@@ -18,7 +23,7 @@ def tables_creation():
             carmodel VARCHAR(200) NULL,
             numberplate VARCHAR(200) NULL)
         """,
-        """ CREATE TABLE rides (
+        """ CREATE TABLE IF NOT EXISTS rides (
                        ride_id SERIAL PRIMARY KEY,
                        ride VARCHAR(155) NOT NULL,
                        driver_id VARCHAR(50) NOT NULL,
@@ -27,7 +32,7 @@ def tables_creation():
                        maximum VARCHAR(100) NOT NULL,
                        status VARCHAR(100) NOT NULL)
         """,
-        """ CREATE TABLE request (
+        """ CREATE TABLE IF NOT EXISTS request (
                        request_id SERIAL PRIMARY KEY,
                        user_id INTEGER NOT NULL,
                        ride_id INTEGER NOT NULL,
@@ -37,7 +42,7 @@ def tables_creation():
         )
     conn = None
     try:
-        conn = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        conn = psycopg2.connect(db)
         cur = conn.cursor()
         for command in commands:
             cur.execute(command)
@@ -57,7 +62,7 @@ class User(object):
     @staticmethod
     def create_user(username, email, password, usertype, carmodel="", numberplate=""):
         """Creates a new user and ensures that the email is unique"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         rows = db_cursor.fetchall()
@@ -77,7 +82,7 @@ class User(object):
     @staticmethod
     def update_user(user_id, username, email, password, usertype, carmodel="", numberplate=""):
         """Updates user information"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         rows = db_cursor.fetchall()
@@ -97,7 +102,7 @@ class User(object):
     @staticmethod
     def delete_user(user_id):
         """Deletes a user"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         rows = db_cursor.fetchall()
@@ -114,7 +119,7 @@ class User(object):
     @staticmethod
     def get_user(user_id):
         """Gets a particular user"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
         user = db_cursor.fetchall()
@@ -126,7 +131,7 @@ class User(object):
     @staticmethod
     def get_all_users():
         """Gets all users"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         users = db_cursor.fetchall()
@@ -140,7 +145,7 @@ class Ride(object):
     @staticmethod
     def create_ride(ride, driver_id, departuretime, cost, maximum, status="pending"):
         """Creates a new ride"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         new_ride = "INSERT INTO rides (ride, driver_id, departuretime, cost, maximum, status) VALUES " \
                     "('" + ride + "', '" + driver_id + "', '" + departuretime + "', '" + cost + "','" + maximum + "','" + status + "' )"
@@ -154,7 +159,7 @@ class Ride(object):
     def update_ride(ride_id, ride, driver_id, departuretime, cost,
                     maximum):
         """Updates ride information"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
         rows = db_cursor.fetchall()
@@ -169,7 +174,7 @@ class Ride(object):
     @staticmethod
     def start_ride(ride_id, driver_id):
         """starts a ride"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
         rows = db_cursor.fetchall()
@@ -189,7 +194,7 @@ class Ride(object):
     @staticmethod
     def delete_ride(ride_id):
         """Deletes a ride"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
         rows = db_cursor.fetchall()
@@ -205,7 +210,7 @@ class Ride(object):
     @staticmethod
     def get_ride(ride_id):
         """Gets a particular ride"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
         ride = db_cursor.fetchall()
@@ -217,7 +222,7 @@ class Ride(object):
     @staticmethod
     def get_all_rides():
         """Gets all rides"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
         rides = db_cursor.fetchall()
@@ -232,7 +237,7 @@ class Request(object):
         """Creates a new request"""
         ride_id = str(ride_id)
         user_id = str(user_id)
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         new_request = "INSERT INTO request (ride_id, user_id, accepted, status) VALUES " \
                     "('" + ride_id + "', '" + user_id + "', '" + '0' + "', '" + status + "')"
@@ -247,7 +252,7 @@ class Request(object):
         """Deletes a request"""
 
         try:
-            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+            db_connection = psycopg2.connect(db)
             db_cursor = db_connection.cursor()
             db_cursor.execute("DELETE FROM request WHERE request_id=%s", (request_id,))
             db_connection.commit()
@@ -260,7 +265,7 @@ class Request(object):
     def update_request(request_id):
         """Accepts/rejects request"""
         try:
-            db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+            db_connection = psycopg2.connect(db)
             db_cursor = db_connection.cursor()
             db_cursor.execute("UPDATE request SET status=%s WHERE request_id=%s",
                                   ("accepted", request_id))
@@ -274,7 +279,7 @@ class Request(object):
     @staticmethod
     def get_requests(request_id):
         """Gets a particular request"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
         request = db_cursor.fetchall()
@@ -286,7 +291,7 @@ class Request(object):
     @staticmethod
     def get_all_requests():
         """Gets all request"""
-        db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
+        db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request")
         requests = db_cursor.fetchall()
