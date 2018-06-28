@@ -171,16 +171,18 @@ class Ride(object):
         """starts a ride"""
         db_connection = psycopg2.connect("dbname='local_db_1' user='postgres' password='1Lomkones.' host='localhost'")
         db_cursor = db_connection.cursor()
-        db_cursor.execute("SELECT * FROM rides")
+        db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
         rows = db_cursor.fetchall()
-        for row in rows:
-            if row[0] == ride_id:
-                if row[2] == driver_id:
-                    db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s",
-                                    ("given", ride_id))
-                    return {"message" : "ride has started"}
+        if rows != []:
+            row = rows[0]
+            if int(row[2]) == driver_id:
+                db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s",
+                                ("given", ride_id))
+                db_connection.commit()
+                db_connection.close()
+                return {"message" : "ride has started"}
 
-                return {"message" : "The ride you want to start is not your ride."}
+            return {"message" : "The ride you want to start is not your ride."}
 
         return {"message" : "ride does not exist"}
 
