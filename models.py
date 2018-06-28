@@ -124,7 +124,13 @@ class User(object):
         db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
         user = db_cursor.fetchall()
         if user != []:
-            return make_response(jsonify({"profile" : user}), 200)
+            user=user[0]
+            info = {user[0] : {"email": user[1],
+                                "username": user[2],
+                                "usertype": user[4],
+                                "car model": user[5],
+                                "number plate": user[5]}}
+            return make_response(jsonify({"profile" : info}), 200)
         return make_response(jsonify({"message" : "user does not exists"}), 404)
 
 
@@ -135,7 +141,15 @@ class User(object):
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM users")
         users = db_cursor.fetchall()
-        return make_response(jsonify({"all users" : users}), 200)
+        all_users = []
+        for user in users:
+            info = {user[0] : {"email": user[1],
+                                "username": user[2],
+                                "usertype": user[4],
+                                "car model": user[5],
+                                "number plate": user[5]}}
+            all_users.append(info)
+        return make_response(jsonify({"All users" : all_users}), 200)
 
 class Ride(object):
     """Contains ride columns and methods to add, update and delete a ride"""
@@ -215,7 +229,14 @@ class Ride(object):
         db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
         ride = db_cursor.fetchall()
         if ride != []:
-            return make_response(jsonify({"profile" : ride}), 200)
+            ride=ride[0]
+            info = {ride[0] : {"ride": ride[1],
+                                "driver_id": ride[2],
+                                "departure_time": ride[3],
+                                "cost": ride[4],
+                                "maximum": ride[5],
+                                "status": ride[6]}}
+            return make_response(jsonify({"ride" : info}), 200)
         return make_response(jsonify({"message" : "ride does not exists"}), 404)
         
     
@@ -226,7 +247,16 @@ class Ride(object):
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM rides")
         rides = db_cursor.fetchall()
-        return make_response(jsonify({"all rides" : rides}), 200)
+        all_rides = []
+        for ride in rides:
+            info = {ride[0] : {"ride": ride[1],
+                                "driver_id": ride[2],
+                                "departure_time": ride[3],
+                                "cost": ride[4],
+                                "maximum": ride[5],
+                                "status": ride[6]}}
+            all_rides.append(info)
+        return make_response(jsonify({"All rides" : all_rides}), 200)
 
 class Request(object):
     """Contains menu columns and methods to add, update and delete a request"""
@@ -271,7 +301,7 @@ class Request(object):
                                   ("accepted", request_id))
             db_connection.commit()
             db_connection.close()
-            return make_response(jsonify({"message" : "ride has been successfully deleted"}), 200)
+            return make_response(jsonify({"message" : "request has been successfully accepted"}), 200)
         except KeyError:
             return make_response(jsonify({"message" : "the specified request does not exist in requests"}), 404)
 
@@ -287,6 +317,23 @@ class Request(object):
             return make_response(jsonify({"profile" : request}), 200)
         return make_response(jsonify({"message" : "ride does not exists"}), 404)
 
+    @staticmethod
+    def get_particular_riderequests(ride_id):
+        db_connection = psycopg2.connect(db)
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request WHERE ride_id=%s", (ride_id,))
+        requests = db_cursor.fetchall()
+        if requests != []:
+            ride_requests = []
+            for request in requests:
+                info = {request[0] : {"user_id": request[1],
+                                        "ride_id": request[2],
+                                        "status": request[3],
+                                        "accepted": request[4]}}
+                ride_requests.append(info)
+            return make_response(jsonify({"ride_requests" : ride_requests}), 200)
+        return make_response(jsonify({"message" : "ride does not exists"}), 404)
+
 
     @staticmethod
     def get_all_requests():
@@ -295,4 +342,11 @@ class Request(object):
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request")
         requests = db_cursor.fetchall()
-        return make_response(jsonify({"all requests" : requests}), 200)
+        ride_requests = []
+        for request in requests:
+            info = {request[0] : {"user_id": request[1],
+                                    "ride_id": request[2],
+                                    "status": request[3],
+                                    "accepted": request[4]}}
+            ride_requests.append(info)
+        return make_response(jsonify({"ride_requests" : ride_requests}), 200)
