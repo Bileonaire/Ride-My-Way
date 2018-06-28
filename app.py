@@ -5,8 +5,8 @@ import datetime
 
 from flask import Flask
 
+from resources.rides import rides_api 
 from resources.users import users_api
-from resources.rides import rides_api
 from models import tables_creation
 
 
@@ -21,21 +21,17 @@ def create_app(configuration):
 
     return app
 
-app = create_app('config.ProductionConfig')
+app = create_app('config.TestingConfig')
 tables_creation()
 
 @app.route('/')
 def hello_world():
     "test that flask app is running"
-    days = {0 : "Monday", 1 : "Tuesday", 2 : "Wednesday", 3 : "Thursday", 4: "Friday"}
+    days = {0 : "Monday", 1 : "Tuesday", 2 : "Wednesday", 3 : "Thursday", 4: "Friday", 5: "Sarturday", 6:"Sunday"}
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
            #datetime.datetime.combine(datetime.date.today(), datetime.time())
-    if today.weekday() <= 4:
-        leo = (days[today.weekday()])
-        return "welcome to Bileonaire Rides this " + leo
-    return "Sorry, we are not open on weekends."
-    
-
+    leo = (days[today.weekday()])
+    return "welcome to Bileonaire Rides this " + leo
 
 if __name__ == '__main__':
     app.run()

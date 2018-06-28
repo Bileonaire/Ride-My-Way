@@ -14,16 +14,10 @@ class TestingConfig(Config):
     """Contains additional config variables required during testing"""
     DEBUG = True
     TESTING = True
-    DATABASE = getenv('TESTING_DATABASE_NAME')
-    PASSWORD = getenv('PASSWORD')
-    HOST = getenv('HOST')
-    USER = getenv('USER')
+    db = getenv('test_db')
 
 class ProductionConfig(Config):
     """Contains additional config variables required during production"""
     DEBUG = True
     TESTING = True
-    DATABASE = getenv('PRODUCTION_DATABASE_NAME')
-    PASSWORD = getenv('PASSWORD')
-    HOST = getenv('HOST')
-    USER = getenv('USER')
+    db = getenv('production_db')
