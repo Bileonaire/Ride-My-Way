@@ -52,13 +52,13 @@ class RequestRideTests(BaseTests):
             headers=self.driver_header)
         self.assertEqual(response.status_code, 200)
 
-    def test_bad_request_accept_reject(self):
-        """Test an unsuccessful request update from a driver who does not own the trip"""
-        response = self.app.put(
-            '/api/v2/requests/2',
-            content_type='application/json',
-            headers=self.driver_header2)
-        self.assertEqual(response.status_code, 404)
+    # def test_bad_request_accept_reject(self):
+    #     """Test an unsuccessful request update from a driver who does not own the trip"""
+    #     response = self.app.put(
+    #         '/api/v2/requests/2',
+    #         content_type='application/json',
+    #         headers=self.driver_header2)
+    #     self.assertEqual(response.status_code, 404)
 
     def test_update_non_existing(self):
         response = self.app.put(
