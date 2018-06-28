@@ -164,6 +164,7 @@ class Login(Resource):
                 return make_response(jsonify({
                     "message" : "successfully logged in",
                     "token" : token.decode('UTF-8')}), 200)
+            return make_response(jsonify({"message" : "invalid email address or password"}), 400)
         except:
             return make_response(jsonify({"message" : "invalid email address or password"}), 400)
 
@@ -207,12 +208,12 @@ class UserList(Resource):
         self.reqparse.add_argument(
             'numberplate',
             required=False,
-            default=None,
+            default="",
             location=['form', 'json'])
         self.reqparse.add_argument(
             'carmodel',
             required=False,
-            default=None,
+            default="",
             location=['form', 'json'])
         super().__init__()
 
@@ -238,7 +239,7 @@ class UserList(Resource):
     def get(self):
         """Get all users"""
         result = models.User.get_all_users()
-        return make_response(jsonify(result), 200)
+        return result
 
 class User(Resource):
     """Contains GET PUT and DELETE methods for interacting with a particular user"""

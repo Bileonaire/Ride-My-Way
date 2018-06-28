@@ -110,7 +110,7 @@ class Ride(Resource):
         """start a particular ride"""
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = str(data['id'])
+        driver_id = data['id']
 
         result = models.Ride.start_ride(ride_id=ride_id, driver_id=driver_id)
         if result == {"message" : "ride has started"}:
