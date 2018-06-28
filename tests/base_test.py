@@ -23,10 +23,6 @@ class BaseTests(unittest.TestCase):
         self.application = app.create_app('config.TestingConfig')
         with self.application.app_context():
             models.tables_creation()
-            admin_reg = models.User.create_user(username="admin",
-                                                email="admin@gmail.com",
-                                                password="admin1234",
-                                                usertype="admin")
 
         user_reg = json.dumps({
             "username" : "user",

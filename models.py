@@ -251,7 +251,7 @@ class Request(object):
         try:
             db_connection = psycopg2.connect(db)
             db_cursor = db_connection.cursor()
-            db_cursor.execute("UPDATE request SET status=%s WHERE request_id=%s", ("accepted", request_id))
+            db_cursor.execute("UPDATE request SET accepted=%s WHERE request_id=%s", (True, request_id))
             db_connection.commit()
             db_connection.close()
             return make_response(jsonify({"message" : "request has been successfully accepted"}), 200)
@@ -323,3 +323,7 @@ def tables_creation():
         cur.execute(table)
     cur.close()
     conn.commit()
+    try:
+        User.create_user(username="admin", email="admin@gmail.com", password="admin1234", usertype="admin")
+    except:
+        pass
