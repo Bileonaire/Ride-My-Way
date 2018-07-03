@@ -8,7 +8,7 @@ import psycopg2
 
 import models
 import config
-from .auth import user_required, driver_required, driver_admin_required
+from .auth import user_required, admin_required
 from models import db
 
 class RideList(Resource):
@@ -33,7 +33,7 @@ class RideList(Resource):
             required=True,
             location=['form', 'json'])
         self.reqparse.add_argument(
-            'cost',
+            'numberplate',
             required=False,
             default="0",
             location=['form', 'json'])
@@ -45,7 +45,7 @@ class RideList(Resource):
             location=['form', 'json'])
         super().__init__()
 
-    @driver_required
+    @user_required
     def post(self):
         """Adds a new ride"""
         kwargs = self.reqparse.parse_args()
@@ -58,7 +58,7 @@ class RideList(Resource):
         result = models.Ride.create_ride(ride=ride,
                                          driver_id=driver_id,
                                          departuretime=kwargs.get("departuretime"),
-                                         cost=kwargs.get("cost"),
+                                         numberplate=kwargs.get("numberplate"),
                                          maximum=kwargs.get("maximum"))
         return result
 
@@ -90,7 +90,7 @@ class Ride(Resource):
             required=True,
             location=['form', 'json'])
         self.reqparse.add_argument(
-            'cost',
+            'numberplate',
             required=False,
             default="0",
             location=['form', 'json'])
@@ -105,7 +105,7 @@ class Ride(Resource):
         return models.Ride.get_ride(ride_id)
 
 
-    @driver_required
+    @user_required
     def post(self, ride_id):
         """start a particular ride"""
         token = request.headers['x-access-token']
@@ -117,7 +117,7 @@ class Ride(Resource):
             return make_response(jsonify(result), 200)
         return make_response(jsonify(result), 404)
 
-    @driver_required
+    @user_required
     def put(self, ride_id):
         """Update a particular ride"""
         kwargs = self.reqparse.parse_args()
@@ -131,11 +131,11 @@ class Ride(Resource):
                                          ride=ride,
                                          driver_id=driver_id,
                                          departuretime=kwargs.get("departuretime"),
-                                         cost=kwargs.get("cost"),
+                                         numberplate=kwargs.get("numberplate"),
                                          maximum=kwargs.get("maximum"))
         return result
 
-    @driver_admin_required
+    @user_required
     def delete(self, ride_id):
         """Delete a particular ride"""
         result = models.Ride.delete_ride(ride_id)
@@ -155,7 +155,7 @@ class RequestRide(Resource):
         result = models.Request.request_ride(ride_id=ride_id, user_id=user_id)
         return result
 
-    @driver_required
+    @user_required
     def get(self, ride_id):
         """get a particular ride requests"""
         result = models.Request.get_particular_riderequests(ride_id=ride_id)
@@ -165,7 +165,7 @@ class RequestRide(Resource):
 class RequestList(Resource):
     """Contains GET method to get all requests"""
 
-    @driver_admin_required
+    @admin_required
     def get(self):
         """Gets all requests"""
         result = models.Request.get_all_requests()
@@ -182,7 +182,7 @@ class Request(Resource):
         result = models.Request.get_requests(request_id)
         return result
 
-    @driver_required
+    @user_required
     def put(self, request_id):
         """accept/reject a particular request"""
 
