@@ -16,8 +16,8 @@ def create_app(configuration):
     app.config.from_object(configuration)
     app.url_map.strict_slashes = False
 
-    app.register_blueprint(users_api, url_prefix='/api/v2')
-    app.register_blueprint(rides_api, url_prefix='/api/v2')
+    app.register_blueprint(users_api, url_prefix='/api/v3')
+    app.register_blueprint(rides_api, url_prefix='/api/v3')
 
     return app
 
