@@ -3,15 +3,12 @@ import re
 import sys
 
 from flask_script import Manager, prompt, prompt_pass
-from flask_migrate import Migrate, MigrateCommand
 
 import models
 from app import app
 
 
-migrate = Migrate(app, models.db)
 manager = Manager(app)
-manager.add_command('db', MigrateCommand)
 
 EMAIL_REGEX = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 
@@ -43,15 +40,11 @@ def createsuperuser():
         username=username,
         email=email,
         password=password,
-        usertype="admin")
+        admin=True)
+
+    sys.exit('\n superuser successfully created')
 
 if __name__ == '__main__':
     manager.run()
-    models.db.create_all()
-
-# $ python manage.py db init
-# $ python manage.py db migrate
-# $ python manage.py db upgrade
-# $ python manage.py db --help
 
 # python manage.py createsuperuser

@@ -19,5 +19,4 @@ class TestingConfig(Config):
 class ProductionConfig(Config):
     """Contains additional config variables required during production"""
     DEBUG = True
-    TESTING = True
     db = getenv('production_db')
