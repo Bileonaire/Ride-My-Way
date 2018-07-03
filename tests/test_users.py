@@ -21,7 +21,7 @@ class UsersTests(BaseTests):
 
     def test_user_get_all(self):
         """Tests normal user unauthorized to get get all users"""
-        response = self.app.get('/api/v2/users', headers=self.user_header)
+        response = self.app.get('/api/v2/users')
         self.assertEqual(response.status_code, 401)
 
     def test_no_token_get_all(self):
@@ -53,7 +53,7 @@ class UsersTests(BaseTests):
         """Tests successfully creating a new user"""
         data = json.dumps({
             "username" : "mark444", "email" : "messsiii@gmail.com",
-            "password" : "secret12345", "confirm_password" : "secret12345", "usertype" : "user"})
+            "password" : "secret12345", "confirm_password" : "secret12345", "admin" : True})
         response = self.app.post(
             '/api/v2/users', data=data,
             content_type='application/json', headers=self.admin_header)
@@ -63,17 +63,20 @@ class UsersTests(BaseTests):
         """Tests unsuccessfully creating a new user"""
         data = json.dumps({
             "username" : "mark444", "email" : "testing@gmail.com",
-            "password" : "secrenotmatch", "confirm_password" : "secret12345", "usertype" : "user"})
+            "password" : "secrenotmatch", "confirm_password" : "secret12345", "admin" : True})
         response = self.app.post(
             '/api/v2/users', data=data,
-            content_type='application/json', headers=self.admin_header)
+            content_type='application/json', headers=self.driver_header)
         self.assertEqual(response.status_code, 400)
 
     def test_used_email(self):
         """Tests successfully creating a new user"""
         data = json.dumps({
-            "username" : "sameemail", "email" : "user@gmail.com",
-            "password" : "secret12345", "confirm_password" : "secret12345", "usertype" : "user"})
+            "username" : "sameemail", "email" : "userkkk@gmail.com",
+            "password" : "secret12345", "confirm_password" : "secret12345", "admin" : True})
+        response1 = self.app.post(
+            '/api/v2/users', data=data,
+            content_type='application/json', headers=self.admin_header)
         response = self.app.post(
             '/api/v2/users', data=data,
             content_type='application/json', headers=self.admin_header)
@@ -83,7 +86,7 @@ class UsersTests(BaseTests):
         """Tests unsuccessfully creating a new user"""
         data = json.dumps({
             "username" : "mark444", "email" : "lesspassi@gmail.com",
-            "password" : "secre", "confirm_password" : "secre", "usertype" : "user"})
+            "password" : "secre", "confirm_password" : "secre", "admin" : True})
         response = self.app.post(
             '/api/v2/users', data=data,
             content_type='application/json', headers=self.admin_header)

@@ -23,6 +23,11 @@ class BaseTests(unittest.TestCase):
         self.application = app.create_app('config.TestingConfig')
         with self.application.app_context():
             models.tables_creation()
+            models.User.create_admin(
+                                    username="admin",
+                                    email="admin@gmail.com",
+                                    password="admin1234",
+                                    admin=True)
 
         user_reg = json.dumps({
             "username" : "user",
@@ -34,17 +39,13 @@ class BaseTests(unittest.TestCase):
             "username" : "driver1",
             "email" : "driver1@gmail.com",
             "password" : "123456789",
-            "confirm_password" : "123456789",
-            "numberplate" : "KBA 375X",
-            "carmodel" : "Subaru"})
+            "confirm_password" : "123456789"})
         
         driver_reg2 = json.dumps({
             "username" : "driver2",
             "email" : "driver2@gmail.com",
             "password" : "123456789",
-            "confirm_password" : "123456789",
-            "numberplate" : "KBX 375X",
-            "carmodel" : "Subaru"})
+            "confirm_password" : "123456789"})
 
         self.user_log = json.dumps({
             "email" : "user@gmail.com",
@@ -66,20 +67,20 @@ class BaseTests(unittest.TestCase):
 
         
         register_user = self.app.post(
-            '/api/v2/auth/userregister', data=user_reg,
+            '/api/v2/auth/register', data=user_reg,
             content_type='application/json')
         register_driver = self.app.post(
-            '/api/v2/auth/driverregister', data=driver_reg,
+            '/api/v2/auth/register', data=driver_reg,
             content_type='application/json')
         
         register_driver2 = self.app.post(
-            '/api/v2/auth/driverregister', data=driver_reg2,
+            '/api/v2/auth/register', data=driver_reg2,
             content_type='application/json')
 
         admin_result = self.app.post(
             '/api/v2/auth/login', data=self.admin_log,
             content_type='application/json')
-        
+
         admin_response = json.loads(admin_result.get_data(as_text=True))
         admin_token = admin_response["token"]
         self.admin_header = {"Content-Type" : "application/json", "x-access-token" : admin_token}
@@ -109,10 +110,10 @@ class BaseTests(unittest.TestCase):
         self.user_header = {"Content-Type" : "application/json", "x-access-token" : user_token}
 
         ride = json.dumps({"departurepoint" : "Syokimau", "destination" : "Nairobi",
-         "departuretime" : "16/04/2015 1400HRS", "cost" : "400", "maximum" : "2"})
+         "departuretime" : "16/04/2015 1400HRS", "numberplate" : "KBH 400", "maximum" : "2"})
 
         ride2 = json.dumps({"departurepoint" : "Syokimau2", "destination" : "Nairobi2",
-         "departuretime" : "16/04/2015 1400HRS", "cost" : "400", "maximum" : "2"})
+         "departuretime" : "16/04/2015 1400HRS", "numberplate" : "KBH 400", "maximum" : "2"})
 
         create_ride = self.app.post(
             '/api/v2/rides', data=ride, content_type='application/json',

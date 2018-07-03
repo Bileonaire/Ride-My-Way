@@ -22,7 +22,7 @@ class UsersTest(BaseTests):
 
     def test_user_get_user(self):
         """Test non-admin user getting one user by providing the user_id"""
-        response = self.app.get('/api/v2/users/2', headers=self.user_header)
+        response = self.app.get('/api/v2/users/2')
         self.assertEqual(response.status_code, 401)
 
     def test_get_non_existing(self):
@@ -37,8 +37,7 @@ class UsersTest(BaseTests):
             "email" : "update1@gmail.com",
             "password" : "123456789",
             "confirm_password" : "123456789",
-            "numberplate" : "KBA 375X",
-            "carmodel" : "Subaru", "usertype" : "driver"})
+            "admin" : False})
         response = self.app.put(
             '/api/v2/users/3', data=data,
             content_type='application/json',
@@ -49,7 +48,7 @@ class UsersTest(BaseTests):
         """Test unsuccessful user update because of short password"""
         data = json.dumps({
             "username" : "user1", "email" : "user1@gmail.com",
-            "password" : "topsecr", "confirm_password" : "topsecr", "usertype" : "user"})
+            "password" : "topsecr", "confirm_password" : "topsecr", "admin" : False})
         response = self.app.put(
             '/api/v2/users/3', data=data,
             content_type='application/json',
@@ -60,7 +59,7 @@ class UsersTest(BaseTests):
         """Test unsuccessful user update because of unmatching passwords"""
         data = json.dumps({
             "username" : "user1", "email" : "user1@gmail.com",
-            "password" : "topsecret157", "confirm_password" : "topsecret1", "usertype" : "user"})
+            "password" : "topsecret157", "confirm_password" : "topsecret1", "admin" : False})
         response = self.app.put(
             '/api/v2/users/3', data=data,
             content_type='application/json',
@@ -71,7 +70,7 @@ class UsersTest(BaseTests):
         """Test updating non_existing user"""
         data = json.dumps({
             "username" : "user1", "email" : "user1@gmail.com",
-            "password" : "topsecret1", "confirm_password" : "topsecret1", "usertype" : "user"})
+            "password" : "topsecret1", "confirm_password" : "topsecret1", "admin" : False})
         response = self.app.put(
             '/api/v2/users/55', data=data,
             content_type='application/json',
@@ -85,7 +84,7 @@ class UsersTest(BaseTests):
     
     def test_delete_non_existing(self):
         """Test a deleting user that does not exist"""
-        response = self.app.delete('/api/v2/users/50', headers=self.admin_header)
+        response = self.app.delete('/api/v2/users/500', headers=self.admin_header)
         self.assertEqual(response.status_code, 404)
 
 if __name__ == '__main__':
