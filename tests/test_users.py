@@ -67,7 +67,7 @@ class UsersTests(BaseTests):
         response = self.app.post(
             '/api/v2/users', data=data,
             content_type='application/json', headers=self.driver_header)
-        self.assertEqual(response.status_code, 400)
+        self.assertEqual(response.status_code, 401)
 
     def test_used_email(self):
         """Tests successfully creating a new user"""

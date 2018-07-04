@@ -13,6 +13,7 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import app
 import models
+import databasesetup
 
 
 class BaseTests(unittest.TestCase):
@@ -22,12 +23,12 @@ class BaseTests(unittest.TestCase):
     def setUp(self):
         self.application = app.create_app('config.TestingConfig')
         with self.application.app_context():
-            models.tables_creation()
-            models.User.create_admin(
-                                    username="admin",
-                                    email="admin@gmail.com",
-                                    password="admin1234",
-                                    admin=True)
+            databasesetup.drop()
+            databasesetup.tables_creation()
+            models.User(username="admin",
+                        email="admin@gmail.com",
+                        password="admin1234",
+                        admin=True)
 
         user_reg = json.dumps({
             "username" : "user",
@@ -134,8 +135,5 @@ class BaseTests(unittest.TestCase):
 
     def tearDown(self):
         with self.application.app_context():
-            db_connection = psycopg2.connect(models.db)
-            db_cursor = db_connection.cursor()
-            db_cursor.execute('DROP TABLE "users", "rides","request";')
-            db_connection.commit()
-            db_connection.close()
+            databasesetup.drop()
+
