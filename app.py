@@ -30,16 +30,8 @@ def hello_world():
     days = {0 : "Monday", 1 : "Tuesday", 2 : "Wednesday", 3 : "Thursday", 4: "Friday", 5: "Sarturday", 6:"Sunday"}
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
            #datetime.datetime.combine(datetime.date.today(), datetime.time())
-    leo = (days[today.weekday()])
-    return "welcome to Bileonaire Rides this " + leo
+    day_name = (days[today.weekday()])
+    return "welcome to Bileonaire Rides this " + day_name
 
 if __name__ == '__main__':
     app.run()
-    # port = int(os.environ.get('PORT', 5000))
-    # app.run('', port=port)
-
-
-
-
-
-
