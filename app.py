@@ -7,7 +7,7 @@ from flask import Flask
 
 from resources.rides import rides_api 
 from resources.users import users_api
-from models import tables_creation
+# from models import tables_creation
 
 
 def create_app(configuration):
@@ -22,7 +22,7 @@ def create_app(configuration):
     return app
 
 app = create_app('config.TestingConfig')
-tables_creation()
+
 
 @app.route('/')
 def hello_world():
