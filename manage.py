@@ -35,10 +35,10 @@ def createsuperuser():
 
     if not password == confirm_password:
         sys.exit('\n kindly ensure that password and confirm password are identical')
+    admin = True
 
-    models.User(username=username, email=email, password=password, admin=True)
+    models.User(username=username, email=email, password=password, admin=admin)
     sys.exit('\n superuser successfully created')
-
 
 if __name__ == '__main__':
     manager.run()
