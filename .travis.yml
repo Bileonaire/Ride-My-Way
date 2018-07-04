@@ -1,0 +1,16 @@
+language: python
+python:
+  - "3.6.4"
+install:
+  - "pip install -r requirements.txt"
+  - pip install coveralls
+before_script:
+  - source ./.travis.sh
+  - psql -c 'create database travis_tests;' -U postgres
+script:
+  - python -m pytest --cov-report term-missing --cov=resources
+after_success:
+  - coveralls
+notifications:
+  email: false
+

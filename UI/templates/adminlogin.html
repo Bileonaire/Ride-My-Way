@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>ADMIN login</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+    <script type="text/javascript" src="static/js/jquery-ui/jquery-3.3.1.min.js"></script>
+    <script src="static/js/jquery-ui/jquery-ui.js"></script>
+    <link href="static/js/jquery-ui/jquery-ui.css" rel="stylesheet">
+</head>
+
+<body class="bodybg">
+    
+    <div id="topbar">
+        <img id="logo" src="static/images/taxi.jpg">
+                    
+        <div id="sign-in-div" class="topbar-section">
+            <img id="signin-image" src="static/images/signin.jpg">   
+            <a href="userlogin.html"><span id="signintext">User Sign in</span></a>
+        </div>
+                    
+        <div id="sign-in-div" class="topbar-section">
+            <img id="signin-image" src="static/images/signin.jpg">
+                        
+            <a href="driverlogin.html"><span id="signintext">Driver Sign in</span></a>
+        </div>
+                
+                    
+    </div>
+        
+    <div class="clear"></div>
+                
+        <div id="menubar-container">
+                
+            <div id="menubar">
+                
+                <h1>RIDE-MY-WAY</h1>
+                        
+            </div>
+                
+            <div class="clear"></div>
+                
+            <div id="menubar2-container">
+            
+                <div id="menubar2">
+                
+                    <p>Admin Login</p>
+                    <a href="index.html"> Home </a>
+                    <a href="allrides.html"> Rides </a>
+                
+                </div>
+
+            </div>
+    
+        </div>
+        
+        <div class="clear"></div>
+        
+        <div id="page-container">
+            
+            <div class="container">
+                
+                <div>
+                    <form action="admin.html">
+                        <div class="form-element">
+
+                        <label class="label" for="email">Email</label>
+                        <input class="inputt" type="email" name="email" id="email" placeholder = "eg. youremail@gmail.com" required>
+
+                        </div>
+                            
+                            
+                        <div class="form-element">
+
+                        <label class="label" for="password">Password</label>
+                        <input class="inputt" type="password" placeholder = "password" required>
+
+                        </div>
+                            
+                        <div class="form-element">
+
+                        <input class="inputt" type="submit" id="submitButton" value="Log in">
+
+                        </div>
+            
+                    </form> 
+        
+                </div>
+    
+            </div>
+    
+        </div>
+    </div>
+            
+</body>
+    
+</html>
