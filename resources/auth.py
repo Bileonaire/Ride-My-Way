@@ -44,13 +44,13 @@ def admin_required(f):
 
         try:
             data = jwt.decode(token, config.Config.SECRET_KEY)
-            if data['admin'] == True:
-                return f(*args, **kwargs)
-
+            if data['admin'] != True:
+                return make_response(jsonify({
+                    "message" : "kindly provide a valid token in the header"}), 401)
         except:
             return make_response(jsonify({
-                "message" : "kindly provide a valid token in the header"}), 401)
-
+                    "message" : "kindly provide a valid token in the header"}), 401)
+        
         return f(*args, **kwargs)
 
     return decorated

@@ -34,7 +34,7 @@ class RideList(Resource):
             location=['form', 'json'])
         self.reqparse.add_argument(
             'numberplate',
-            required=False,
+            required=True,
             default="0",
             location=['form', 'json'])
         self.reqparse.add_argument(
@@ -188,17 +188,43 @@ class Request(Resource):
 
         token = request.headers['x-access-token']
         data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = data['id']
+        user_id = data['id']
 
         db_connection = psycopg2.connect(db)
         db_cursor = db_connection.cursor()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
         requests = db_cursor.fetchall()
         db_connection.close()
-        if requests != []:
+        if requests == []:
+            return make_response(jsonify({"message" : "request does not exists"}), 404)
+        
+        requesti = requests[0]
+        ride_id = int(requesti[2])
+        if requesti[4] == True:
+            reject = models.Request.reject_request(request_id)
+            return reject
+
+        db_connection = psycopg2.connect(db)
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT driver_id, maximum FROM rides WHERE ride_id=%s", (ride_id))
+        ride = db_cursor.fetchone()
+        db_connection.close()
+        maximum = int(ride[1])
+
+        if user_id != ride[0]:
+            return make_response(jsonify({"message" : "request not of your ride"}), 400)
+           
+        db_connection = psycopg2.connect(db)
+        db_cursor = db_connection.cursor()
+        db_cursor.execute("SELECT * FROM request WHERE ride_id=%s accepted=%s", (ride_id,True))
+        accepted = db_cursor.fetchall()
+        db_connection.close()
+        total = len(accepted)  
+
+        if total < maximum:
             update = models.Request.update_request(request_id)
             return update
-        return make_response(jsonify({"message" : "request does not exists"}), 404)
+        return make_response(jsonify({"message" : "maximum requests have been accepted"}), 400)
 
 
     @user_required
@@ -227,4 +253,3 @@ api.add_resource(Ride, '/rides/<int:ride_id>', endpoint='ride')
 api.add_resource(RequestRide, '/rides/<int:ride_id>/requests', endpoint='requestride')
 api.add_resource(RequestList, '/requests', endpoint='requests')
 api.add_resource(Request, '/requests/<int:request_id>', endpoint='request')
-

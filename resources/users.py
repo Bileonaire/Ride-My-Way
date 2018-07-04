@@ -53,11 +53,20 @@ class User_Register(Resource):
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.create_user(username=kwargs.get('username'),
+                db_connection = psycopg2.connect(db)
+                db_cursor = db_connection.cursor()
+                db_cursor.execute("SELECT * FROM users")
+                users = db_cursor.fetchall()
+
+                for user in users:
+                    if user[1] == kwargs.get('email'):
+                        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+
+                result = models.User(username=kwargs.get('username'),
                                                  email=kwargs.get('email'),
                                                  password=kwargs.get('password'),
                                                  admin=False)
-                return result
+                return make_response(jsonify({"message" : "user has been successfully created"}), 201)
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
         return make_response(jsonify({
@@ -156,11 +165,19 @@ class UserList(Resource):
         kwargs = self.reqparse.parse_args()
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                result = models.User.create_user(username=kwargs.get('username'),
+                db_connection = psycopg2.connect(db)
+                db_cursor = db_connection.cursor()
+                db_cursor.execute("SELECT * FROM users")
+                users = db_cursor.fetchall()
+
+                for user in users:
+                    if user[1] == kwargs.get('email'):
+                        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                result = models.User(username=kwargs.get('username'),
                                                  email=kwargs.get('email'),
                                                  password=kwargs.get('password'),
                                                  admin=kwargs.get('admin'))
-                return result
+                return make_response(jsonify({"message" : "user has been successfully created"}), 201)
             return make_response(jsonify({
                 "message" : "password should be at least 8 characters"}), 400)
         return make_response(jsonify({
