@@ -36,6 +36,5 @@ python-editor==1.0.3
 pytz==2018.4
 PyYAML==3.12
 six==1.11.0
-SQLAlchemy==1.2.7
 Werkzeug==0.14.1
 wrapt==1.10.11
