@@ -294,15 +294,8 @@ class Relation:
         request = db_cursor.fetchone()
 
         ride_id = str(request[2])
-        print(ride_id)
-        db_cursor = db.con()
-        db_cursor.execute("SELECT * FROM request")
-        rides = db_cursor.fetchall()
-        print(rides)
-        db_cursor = db.con()
         db_cursor.execute("SELECT driver_id FROM rides WHERE ride_id=%s", (ride_id,))
         driver_id = db_cursor.fetchone()
-        print(driver_id)
         driver_id = driver_id[0]
 
         return str(driver_id)
