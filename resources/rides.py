@@ -8,8 +8,8 @@ import psycopg2
 
 import models
 import config
-from .auth import user_required, admin_required
-from models import db
+from .auth import user_required, admin_required, user_id_required
+from databasesetup import db
 
 class RideList(Resource):
     """Contains GET and POST methods"""
@@ -45,16 +45,21 @@ class RideList(Resource):
             location=['form', 'json'])
         super().__init__()
 
-    @user_required
-    def post(self):
+    @user_id_required
+    def post(self, user_id):
         """Adds a new ride"""
         kwargs = self.reqparse.parse_args()
+        driver_id = str(user_id)
 
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = str(data['id'])
+        db_cursor = db.con()
+        db_cursor.execute("SELECT * FROM rides WHERE driver_id=%s and departuretime=%s",
+                         (driver_id, kwargs.get("departuretime"),))
+        ride = db_cursor.fetchone()
+
+        if ride != None:
+            return make_response(jsonify({"message" : "you will be on another ride at that time"}), 400)
+
         ride = kwargs.get("departurepoint") + " to " + kwargs.get("destination")
-
         result = models.Ride.create_ride(ride=ride,
                                          driver_id=driver_id,
                                          departuretime=kwargs.get("departuretime"),
@@ -105,26 +110,28 @@ class Ride(Resource):
         return models.Ride.get_ride(ride_id)
 
 
-    @user_required
-    def post(self, ride_id):
+    @user_id_required
+    def post(self, ride_id, user_id):
         """start a particular ride"""
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = data['id']
+        driver_id = user_id
 
         result = models.Ride.start_ride(ride_id=ride_id, driver_id=driver_id)
         if result == {"message" : "ride has started"}:
             return make_response(jsonify(result), 200)
         return make_response(jsonify(result), 404)
 
-    @user_required
-    def put(self, ride_id):
+    @user_id_required
+    def put(self, ride_id, user_id):
         """Update a particular ride"""
         kwargs = self.reqparse.parse_args()
 
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        driver_id = data['id']
+        driver_id = user_id
+        db_cursor = db.con()
+        db_cursor.execute("SELECT * FROM rides WHERE ride_id=%s", (ride_id,))
+        ride = db_cursor.fetchall()
+
+        if ride == []:
+            return make_response(jsonify({"message" : "ride does not exist"}), 404)
 
         ride = kwargs.get("departurepoint") + " to " +kwargs.get("destination")
         result = models.Ride.update_ride(ride_id=ride_id,
@@ -145,13 +152,9 @@ class RequestRide(Resource):
     """Contains POST method for requsting a particular ride"""
 
 
-    @user_required
-    def post(self, ride_id):
+    @user_id_required
+    def post(self, ride_id, user_id):
         """Request a particular ride"""
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        user_id = data['id']
-
         result = models.Request.request_ride(ride_id=ride_id, user_id=user_id)
         return result
 
@@ -182,67 +185,52 @@ class Request(Resource):
         result = models.Request.get_requests(request_id)
         return result
 
-    @user_required
-    def put(self, request_id):
+    @user_id_required
+    def put(self, request_id, user_id):
         """accept/reject a particular request"""
-
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        user_id = data['id']
-
-        db_connection = psycopg2.connect(db)
-        db_cursor = db_connection.cursor()
+        db_cursor = db.con()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
-        requests = db_cursor.fetchall()
-        db_connection.close()
-        if requests == []:
+        requesti = db_cursor.fetchone()
+
+        if requesti == None:
             return make_response(jsonify({"message" : "request does not exists"}), 404)
         
-        requesti = requests[0]
-        ride_id = int(requesti[2])
-        if requesti[4] == True:
-            reject = models.Request.reject_request(request_id)
-            return reject
+        ride_id = requesti[2]
+        driver_id = models.Relation.get_driver_id(request_id)
+        if int(driver_id) == int(user_id):
+            if requesti[4] == True:
+                db_cursor = db.con()
+                db_cursor.execute("UPDATE request SET accepted=%s WHERE request_id=%s",
+                                    (False, request_id))
+                db.commit()
+                return make_response(jsonify({"message" : "request has been rejected"}), 200)
+            
+            db_cursor.execute("SELECT * FROM request WHERE ride_id=%s and accepted=%s", (ride_id,True,))
+            accepted = db_cursor.fetchall()
+            total = len(accepted)
+            maximum = models.Relation.get_maximum(request_id)
 
-        db_connection = psycopg2.connect(db)
-        db_cursor = db_connection.cursor()
-        db_cursor.execute("SELECT driver_id, maximum FROM rides WHERE ride_id=%s", (ride_id))
-        ride = db_cursor.fetchone()
-        db_connection.close()
-        maximum = int(ride[1])
-
-        if user_id != ride[0]:
-            return make_response(jsonify({"message" : "request not of your ride"}), 400)
-           
-        db_connection = psycopg2.connect(db)
-        db_cursor = db_connection.cursor()
-        db_cursor.execute("SELECT * FROM request WHERE ride_id=%s accepted=%s", (ride_id,True))
-        accepted = db_cursor.fetchall()
-        db_connection.close()
-        total = len(accepted)  
-
-        if total < maximum:
-            update = models.Request.update_request(request_id)
-            return update
-        return make_response(jsonify({"message" : "maximum requests have been accepted"}), 400)
+            if int(total) < int(maximum):
+                update = models.Request.accept_request(request_id)
+                return update
+            return make_response(jsonify({"message" : "maximum requests have been accepted"}), 400)
+        return make_response(jsonify({"message" : "the request is not of your ride"}), 400)
 
 
-    @user_required
-    def delete(self, request_id):
+    @user_id_required
+    def delete(self, request_id, user_id):
         """Delete a particular request"""
+        currentuser_id = user_id
 
-        token = request.headers['x-access-token']
-        data = jwt.decode(token, config.Config.SECRET_KEY)
-        currentuser_id = data['id']
-
-        db_connection = psycopg2.connect(db)
-        db_cursor = db_connection.cursor()
+        db_cursor = db.con()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
-        requests = db_cursor.fetchall()
-        db_connection.close()
-        if requests != []:
-            delete = models.Request.delete_request(request_id)
-            return delete
+        request = db_cursor.fetchone()
+
+        if request != None:
+            if currentuser_id == request[1]:
+                delete = models.Request.delete_request(request_id)
+                return delete
+            return make_response(jsonify({"message" : "the request is not yours"}), 400)
         return make_response(jsonify({"message" : "request does not exists"}), 404)
 
 

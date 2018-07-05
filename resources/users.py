@@ -11,7 +11,9 @@ import jwt
 import models
 import config
 from .auth import admin_required
-from models import db
+from databasesetup import db
+
+
 class User_Register(Resource):
     "Contains a POST method to register a new user"
 
@@ -53,19 +55,17 @@ class User_Register(Resource):
 
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                db_connection = psycopg2.connect(db)
-                db_cursor = db_connection.cursor()
-                db_cursor.execute("SELECT * FROM users")
-                users = db_cursor.fetchall()
+                db_cursor = db.con()
+                db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get('email'),))
+                user = db_cursor.fetchall()
 
-                for user in users:
-                    if user[1] == kwargs.get('email'):
-                        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                if user != []:
+                    return make_response(jsonify({"message" : "user with that email already exists"}), 400)
 
                 result = models.User(username=kwargs.get('username'),
-                                                 email=kwargs.get('email'),
-                                                 password=kwargs.get('password'),
-                                                 admin=False)
+                                     email=kwargs.get('email'),
+                                     password=kwargs.get('password'),
+                                     admin=False)
                 return make_response(jsonify({"message" : "user has been successfully created"}), 201)
             return make_response(jsonify({
                 "message" : "password should be atleast 8 characters"}), 400)
@@ -98,16 +98,13 @@ class Login(Resource):
         """login a user"""
         try:
             kwargs = self.reqparse.parse_args()
-            db_connection = psycopg2.connect(db)
-            db_cursor = db_connection.cursor()
+            db_cursor = db.con()
             db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get("email"),))
-            row = db_cursor.fetchall()
-            row = row[0]
-            db_connection.close()
-            if check_password_hash(row[3], kwargs.get("password")) == True:
+            user = db_cursor.fetchone()
+            if check_password_hash(user[3], kwargs.get("password")) == True:
                 token = jwt.encode({
-                    'id' : row[0],
-                    'admin' : row[4],
+                    'id' : user[0],
+                    'admin' : user[4],
                     'exp' : datetime.datetime.utcnow() + datetime.timedelta(weeks=3)},
                                     config.Config.SECRET_KEY)
 
@@ -163,25 +160,25 @@ class UserList(Resource):
     def post(self):
         """Register a new user or admin"""
         kwargs = self.reqparse.parse_args()
+
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
-                db_connection = psycopg2.connect(db)
-                db_cursor = db_connection.cursor()
-                db_cursor.execute("SELECT * FROM users")
-                users = db_cursor.fetchall()
+                db_cursor = db.con()
+                db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get('email'),))
+                user = db_cursor.fetchall()
 
-                for user in users:
-                    if user[1] == kwargs.get('email'):
-                        return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+                if user != []:
+                    return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+
                 result = models.User(username=kwargs.get('username'),
                                                  email=kwargs.get('email'),
                                                  password=kwargs.get('password'),
                                                  admin=kwargs.get('admin'))
                 return make_response(jsonify({"message" : "user has been successfully created"}), 201)
             return make_response(jsonify({
-                "message" : "password should be at least 8 characters"}), 400)
+                "message" : "password should be atleast 8 characters"}), 400)
         return make_response(jsonify({
-            "message" : "password and confirm password should be identical"}), 400)
+            "message" : "password and cofirm password should be identical"}), 400)
 
     @admin_required
     def get(self):
@@ -240,6 +237,20 @@ class User(Resource):
         kwargs = self.reqparse.parse_args()
         if kwargs.get('password') == kwargs.get('confirm_password'):
             if len(kwargs.get('password')) >= 8:
+                db_cursor = db.con()
+                db_cursor.execute("SELECT * FROM users WHERE email=%s", (kwargs.get('email'),))
+                user = db_cursor.fetchall()
+
+                if user != []:
+                    return make_response(jsonify({"message" : "user with that email already exists"}), 400)
+
+                db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
+                by_id = db_cursor.fetchall()
+
+                if by_id == []:
+                    return make_response(jsonify({"message" : "user does not exist"}), 404)
+
+
                 result = models.User.update_user(user_id=user_id,
                                                  username=kwargs.get('username'),
                                                  email=kwargs.get('email'),
@@ -254,6 +265,12 @@ class User(Resource):
     @admin_required
     def delete(self, user_id):
         """Delete a particular user"""
+        db_cursor = db.con()
+        db_cursor.execute("SELECT * FROM users WHERE user_id=%s", (user_id,))
+        user = db_cursor.fetchall()
+
+        if user == []:
+            return make_response(jsonify({"message" : "user does not exist"}), 404)
         return models.User.delete_user(user_id=user_id)
 
 
