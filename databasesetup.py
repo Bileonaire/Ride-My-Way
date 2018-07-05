@@ -45,7 +45,7 @@ class InitDatabase():
         except psycopg2.Error:
             raise SystemExit("Failed {}".format(sys.exc_info()))
 
-db = InitDatabase(config.TestingConfig.db)
-# db = InitDatabase(config.ProductionConfig.db)
+# db = InitDatabase(config.TestingConfig.db)
+db = InitDatabase(config.ProductionConfig.db)
 # db.tables_creation()
 # db.drop()
