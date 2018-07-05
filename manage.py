@@ -6,6 +6,7 @@ from flask_script import Manager, prompt, prompt_pass
 
 import models
 from app import app
+from databasesetup import db
 
 
 manager = Manager(app)
@@ -15,6 +16,7 @@ EMAIL_REGEX = re.compile(r"(^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z0-9-.]+$)")
 @manager.command
 def createsuperuser():
     """Create a superuser, requires username, email and password."""
+    db.tables_creation()
 
     username = prompt('superuser username')
 
