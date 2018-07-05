@@ -7,7 +7,6 @@ from flask import Flask
 
 from resources.rides import rides_api 
 from resources.users import users_api
-# from models import tables_creation
 
 
 def create_app(configuration):
@@ -16,8 +15,8 @@ def create_app(configuration):
     app.config.from_object(configuration)
     app.url_map.strict_slashes = False
 
-    app.register_blueprint(users_api, url_prefix='/api/v2')
-    app.register_blueprint(rides_api, url_prefix='/api/v2')
+    app.register_blueprint(users_api, url_prefix='/api/v3')
+    app.register_blueprint(rides_api, url_prefix='/api/v3')
 
     return app
 
@@ -29,7 +28,6 @@ def hello_world():
     "test that flask app is running"
     days = {0 : "Monday", 1 : "Tuesday", 2 : "Wednesday", 3 : "Thursday", 4: "Friday", 5: "Sarturday", 6:"Sunday"}
     today = datetime.datetime.combine(datetime.date.today(), datetime.time())
-           #datetime.datetime.combine(datetime.date.today(), datetime.time())
     day_name = (days[today.weekday()])
     return "welcome to Bileonaire Rides this " + day_name
 
