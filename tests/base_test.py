@@ -13,7 +13,8 @@ sys.path.insert(0, os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 import app
 import models
-import databasesetup
+from databasesetup import db
+import config
 
 
 class BaseTests(unittest.TestCase):
@@ -23,8 +24,9 @@ class BaseTests(unittest.TestCase):
     def setUp(self):
         self.application = app.create_app('config.TestingConfig')
         with self.application.app_context():
-            databasesetup.drop()
-            databasesetup.tables_creation()
+            self.db = db
+            self.db.drop()
+            self.db.tables_creation()
             models.User(username="admin",
                         email="admin@gmail.com",
                         password="admin1234",
@@ -68,18 +70,18 @@ class BaseTests(unittest.TestCase):
 
         
         register_user = self.app.post(
-            '/api/v2/auth/register', data=user_reg,
+            '/api/v3/auth/register', data=user_reg,
             content_type='application/json')
         register_driver = self.app.post(
-            '/api/v2/auth/register', data=driver_reg,
+            '/api/v3/auth/register', data=driver_reg,
             content_type='application/json')
         
         register_driver2 = self.app.post(
-            '/api/v2/auth/register', data=driver_reg2,
+            '/api/v3/auth/register', data=driver_reg2,
             content_type='application/json')
 
         admin_result = self.app.post(
-            '/api/v2/auth/login', data=self.admin_log,
+            '/api/v3/auth/login', data=self.admin_log,
             content_type='application/json')
 
         admin_response = json.loads(admin_result.get_data(as_text=True))
@@ -87,7 +89,7 @@ class BaseTests(unittest.TestCase):
         self.admin_header = {"Content-Type" : "application/json", "x-access-token" : admin_token}
 
         driver_result = self.app.post(
-            '/api/v2/auth/login', data=self.driver_log,
+            '/api/v3/auth/login', data=self.driver_log,
             content_type='application/json')
 
         driver_response = json.loads(driver_result.get_data(as_text=True))
@@ -95,7 +97,7 @@ class BaseTests(unittest.TestCase):
         self.driver_header = {"Content-Type" : "application/json", "x-access-token" : driver_token}
 
         driver_result2 = self.app.post(
-            '/api/v2/auth/login', data=self.driver_log2,
+            '/api/v3/auth/login', data=self.driver_log2,
             content_type='application/json')
 
         driver_response2 = json.loads(driver_result2.get_data(as_text=True))
@@ -103,7 +105,7 @@ class BaseTests(unittest.TestCase):
         self.driver_header2 = {"Content-Type" : "application/json", "x-access-token" : driver_token2}
         
         user_result = self.app.post(
-            '/api/v2/auth/login', data=self.user_log,
+            '/api/v3/auth/login', data=self.user_log,
             content_type='application/json')
 
         user_response = json.loads(user_result.get_data(as_text=True))
@@ -117,23 +119,23 @@ class BaseTests(unittest.TestCase):
          "departuretime" : "16/04/2015 1400HRS", "numberplate" : "KBH 400", "maximum" : "2"})
 
         create_ride = self.app.post(
-            '/api/v2/rides', data=ride, content_type='application/json',
+            '/api/v3/rides', data=ride, content_type='application/json',
             headers=self.driver_header)
 
         create_ride2 = self.app.post(
-            '/api/v2/rides', data=ride2, content_type='application/json',
+            '/api/v3/rides', data=ride2, content_type='application/json',
             headers=self.driver_header)
 
         requestride = self.app.post(
-            '/api/v2/rides/1/requests',
+            '/api/v3/rides/1/requests',
             headers=self.user_header)
         
         requestride = self.app.post(
-            '/api/v2/rides/2/requests',
+            '/api/v3/rides/2/requests',
             headers=self.user_header)
 
 
     def tearDown(self):
         with self.application.app_context():
-            databasesetup.drop()
+            self.db.drop()
 
