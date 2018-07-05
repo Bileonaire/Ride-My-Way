@@ -12,7 +12,7 @@ swagger = Swagger(app)
 
 
 # Users
-@app.route('/api/v3/auth/userregister', methods=["POST"])
+@app.route('/api/v3/auth/register', methods=["POST"])
 def signup():
     """ endpoint for registering users.
     ---
@@ -47,37 +47,6 @@ def login():
       - name: password
         in: formData
         type: password
-        required: true
-    """
-
-@app.route('/api/v3/auth/driverregister', methods=["POST"])
-def Driversignup():
-    """ endpoint for registering users.
-    ---
-    parameters:
-      - name: username
-        required: true
-        in: formData
-        type: string
-      - name: email
-        in: formData
-        type: string
-        required: true
-      - name: password
-        in: formData
-        type: string
-        required: true
-      - name: confirm_password
-        in: formData
-        type: string
-        required: true
-      - name: carmodel
-        in: formData
-        type: string
-        required: true
-      - name: numberplate
-        in: formData
-        type: string
         required: true
     """
 
