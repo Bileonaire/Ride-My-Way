@@ -403,7 +403,7 @@ def delete_request():
 @app.route('/')
 def hello_world():
     "test that flask app is running"
-    return "To view the docs visit: https://bileonairerides.herokuapp.com/apidocs"
+    return "To view the docs visit: https://ride-my-way-v3.herokuapp.com/apidocs"
 
 
 if __name__ == "__main__":
