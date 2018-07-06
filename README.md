@@ -62,8 +62,7 @@ Here is a list of all endpoints in the Bileonaire Rides API
 
 Endpoint | Functionality 
 ------------ | -------------
-POST   /api/v2/auth/userregister | Register a user
-POST   /api/v2/auth/driverregister | Register a driver
+POST   /api/v2/auth/register | Register a user
 POST   /api/v2/auth/login | Log in user
 POST   /api/v2/users | Create a user
 GET    /api/v2/users | Get all users
@@ -116,7 +115,7 @@ https://Bileonaire.github.io/
 
 ## Heroku
 
-https://bileonaireclub.herokuapp.com/apidocs
+https://ride-my-way-v3.herokuapp.com/apidocs
 
 ## Versioning
 
