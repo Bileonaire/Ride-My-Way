@@ -296,9 +296,11 @@ class Relation:
         ride_id = str(request[2])
         db_cursor.execute("SELECT driver_id FROM rides WHERE ride_id=%s", (ride_id,))
         driver_id = db_cursor.fetchone()
+        if driver_id == None:
+            return make_response(jsonify({"message" : "ride does not exists"}), 404)
         driver_id = driver_id[0]
 
-        return str(driver_id)
+        return int(driver_id)
     
     @staticmethod
     def get_maximum(request_id):

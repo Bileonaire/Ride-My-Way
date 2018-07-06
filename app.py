@@ -7,6 +7,7 @@ from flask import Flask
 
 from resources.rides import rides_api 
 from resources.users import users_api
+from databasesetup import db
 
 
 def create_app(configuration):
@@ -17,6 +18,7 @@ def create_app(configuration):
 
     app.register_blueprint(users_api, url_prefix='/api/v3')
     app.register_blueprint(rides_api, url_prefix='/api/v3')
+    db.tables_creation()
 
     return app
 
