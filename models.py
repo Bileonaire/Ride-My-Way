@@ -131,7 +131,9 @@ class Ride():
         if ride != []:
             ride = ride[0]
             if int(ride[2]) == driver_id:
-                db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s", ("given", ride_id))
+                db_cursor.execute("UPDATE rides SET status=%s WHERE ride_id=%s", ("given", ride_id,))
+                db_cursor.execute("UPDATE request SET status=%s WHERE ride_id=%s and accepted=%s", ("taken", ride_id, True,))
+                db_cursor.execute("UPDATE request SET status=%s WHERE ride_id=%s and accepted=%s", ("rejected", ride_id, False,))
                 db.commit()
 
                 return {"message" : "ride has started"}
@@ -209,8 +211,15 @@ class Request:
     @classmethod
     def request_ride(cls, ride_id, user_id, accepted=False, status="pending"):
         """Creates a new request"""
-        cls(ride_id, user_id, accepted, status)
-        return make_response(jsonify({"message" : "request has been successfully sent for approval"}), 201)
+        db_cursor = db.con()
+        db_cursor.execute("SELECT status, driver_id FROM rides WHERE ride_id=%s", (ride_id,))
+        ride = db_cursor.fetchone()
+        if ride != None and ride[0] == "pending":
+            if user_id != int(ride[1]):
+                cls(ride_id, user_id, accepted, status)
+                return make_response(jsonify({"message" : "request has been successfully sent for approval"}), 201)
+            return make_response(jsonify({"message" : "sorry, you cannot request your own ride"}), 400)
+        return make_response(jsonify({"message" : "ride is not available for request"}), 400)
 
     @staticmethod
     def delete_request(request_id):
@@ -244,10 +253,14 @@ class Request:
         """Gets a particular request"""
         db_cursor = db.con()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
-        request = db_cursor.fetchall()
+        request = db_cursor.fetchone()
 
-        if request != []:
-            return make_response(jsonify({"profile" : request}), 200)
+        if request != None:
+            info = {request[0] : {"user_id": request[1],
+                                        "ride_id": request[2],
+                                        "status": request[3],
+                                        "accepted": request[4]}}
+            return make_response(jsonify({"request" : info}), 200)
         return make_response(jsonify({"message" : "request does not exists"}), 404)
 
     @staticmethod
