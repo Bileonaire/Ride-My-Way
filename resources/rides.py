@@ -97,11 +97,12 @@ class Ride(Resource):
         self.reqparse.add_argument(
             'numberplate',
             required=False,
-            default="0",
             location=['form', 'json'])
         self.reqparse.add_argument(
             'maximum',
             required=True,
+            type=int,
+            help="kindly provide a valid number of maximum passengers",
             location=['form', 'json'])
         super().__init__()
 
@@ -190,14 +191,15 @@ class Request(Resource):
         """accept/reject a particular request"""
         db_cursor = db.con()
         db_cursor.execute("SELECT * FROM request WHERE request_id=%s", (request_id,))
-        requesti = db_cursor.fetchone()
+        requesti = db_cursor.fetchall()
 
-        if requesti == None:
-            return make_response(jsonify({"message" : "request does not exists"}), 404)
-        
-        ride_id = requesti[2]
+        if requesti == []:
+            return make_response(jsonify({"message" : "request does not exist"}), 404)
+
         driver_id = models.Relation.get_driver_id(request_id)
-        if int(driver_id) == int(user_id):
+        if type(driver_id) == int and driver_id == int(user_id):
+            requesti=requesti[0]
+            ride_id = requesti[2]
             if requesti[4] == True:
                 db_cursor = db.con()
                 db_cursor.execute("UPDATE request SET accepted=%s WHERE request_id=%s",
