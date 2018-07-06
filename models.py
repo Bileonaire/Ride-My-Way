@@ -169,7 +169,7 @@ class Ride():
             info = {ride[0] : {"ride": ride[1],
                                 "driver_id": ride[2],
                                 "departure_time": ride[3],
-                                "cost": ride[4],
+                                "numberplate": ride[4],
                                 "maximum": ride[5],
                                 "status": ride[6]}}
             return make_response(jsonify({"ride" : info}), 200)
@@ -186,7 +186,7 @@ class Ride():
             info = {ride[0] : {"ride": ride[1],
                                 "driver_id": ride[2],
                                 "departure_time": ride[3],
-                                "cost": ride[4],
+                                "numberplate": ride[4],
                                 "maximum": ride[5],
                                 "status": ride[6]}}
             all_rides.append(info)
