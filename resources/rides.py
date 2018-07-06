@@ -40,7 +40,7 @@ class RideList(Resource):
         self.reqparse.add_argument(
             'maximum',
             required=True,
-            type=str,
+            type=int,
             help="kindly provide a valid integer of the maximum number of passengers",
             location=['form', 'json'])
         super().__init__()
@@ -52,8 +52,8 @@ class RideList(Resource):
         driver_id = str(user_id)
 
         db_cursor = db.con()
-        db_cursor.execute("SELECT * FROM rides WHERE driver_id=%s and departuretime=%s",
-                         (driver_id, kwargs.get("departuretime"),))
+        db_cursor.execute("SELECT * FROM rides WHERE driver_id=%s and departuretime=%s and status=%s",
+                         (driver_id, kwargs.get("departuretime"),"pending",))
         ride = db_cursor.fetchone()
 
         if ride != None:
@@ -64,7 +64,7 @@ class RideList(Resource):
                                          driver_id=driver_id,
                                          departuretime=kwargs.get("departuretime"),
                                          numberplate=kwargs.get("numberplate"),
-                                         maximum=kwargs.get("maximum"))
+                                         maximum=str(kwargs.get("maximum")))
         return result
 
     def get(self):

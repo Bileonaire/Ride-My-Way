@@ -116,7 +116,7 @@ class BaseTests(unittest.TestCase):
          "departuretime" : "16/04/2015 1400HRS", "numberplate" : "KBH 400", "maximum" : "2"})
 
         ride2 = json.dumps({"departurepoint" : "Syokimau2", "destination" : "Nairobi2",
-         "departuretime" : "16/04/2015 1400HRS", "numberplate" : "KBH 400", "maximum" : "2"})
+         "departuretime" : "16/04/2015 HRS", "numberplate" : "KBH 400", "maximum" : "2"})
 
         create_ride = self.app.post(
             '/api/v3/rides', data=ride, content_type='application/json',
