@@ -199,8 +199,8 @@ def create_ride():
         required: true
         in: formData
         type: string
-      - name: cost
-        required: false
+      - name: numberplate
+        required: true
         in: formData
         type: string
       - name: maximum
@@ -267,8 +267,8 @@ def update_ride():
         required: true
         in: formData
         type: string
-      - name: cost
-        required: false
+      - name: numberplate
+        required: true
         in: formData
         type: string
       - name: maximum
