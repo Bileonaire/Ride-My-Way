@@ -60,7 +60,12 @@ class RequestRideTests(BaseTests):
          "departuretime" : "16/04/", "numberplate" : "KBH 400", "maximum" : "2"})
         create_ride = self.app.post(
             '/api/v3/rides', data=ride, content_type='application/json',
+            headers=self.driver_header)           
+        response = self.app.put(
+            '/api/v3/requests/1',
+            content_type='application/json',
             headers=self.driver_header)
+        self.assertEqual(response.status_code, 200)
         response = self.app.put(
             '/api/v3/requests/1',
             content_type='application/json',
@@ -87,10 +92,16 @@ class RequestRideTests(BaseTests):
             headers=self.driver_header)
         self.assertEqual(response.status_code, 404)
 
+    def test_bad_deletion(self):
+        """Test a unsuccessful request deletion where request is not yours"""
+        response = self.app.delete('/api/v3/requests/1', headers=self.driver_header)
+        self.assertEqual(response.status_code, 400)
+
     def test_good_deletion(self):
         """Test a successful request deletion"""
         response = self.app.delete('/api/v3/requests/1', headers=self.user_header)
         self.assertEqual(response.status_code, 200)
+
 
     def test_deleting_non_existing(self):
         """Test deleting request that does not exist"""

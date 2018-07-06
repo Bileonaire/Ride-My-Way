@@ -43,6 +43,20 @@ class UsersTest(BaseTests):
             content_type='application/json',
             headers=self.admin_header)
         self.assertEqual(response.status_code, 200)
+    
+    def test_existing_email_update(self):
+        """Test a successful user update"""
+        data = json.dumps({
+            "username" : "update",
+            "email" : "admin@gmail.com",
+            "password" : "123456789",
+            "confirm_password" : "123456789",
+            "admin" : False})
+        response = self.app.put(
+            '/api/v3/users/3', data=data,
+            content_type='application/json',
+            headers=self.admin_header)
+        self.assertEqual(response.status_code, 400)
 
     def test_update_short_password(self):
         """Test unsuccessful user update because of short password"""
