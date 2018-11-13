@@ -206,7 +206,7 @@ class Request(Resource):
                                     (False, request_id))
                 db.commit()
                 return make_response(jsonify({"message" : "request has been rejected"}), 200)
-            
+
             db_cursor.execute("SELECT * FROM request WHERE ride_id=%s and accepted=%s", (ride_id,True,))
             accepted = db_cursor.fetchall()
             total = len(accepted)
@@ -235,6 +235,51 @@ class Request(Resource):
             return make_response(jsonify({"message" : "the request is not yours"}), 400)
         return make_response(jsonify({"message" : "request does not exists"}), 404)
 
+class Slack(Resource):
+    """Contains Post methods for slack"""
+
+    def post(self):
+        """start a particular ride"""
+        result = {"message": {"text": 'Would you like to play a game?',
+   "attachments": [{
+       "text": 'Choose a game to play',
+       "fallback": 'You are unable to choose a game',
+       "callback_id": 'wopr_game',
+       "color": '#3AA3E3',
+       "attachment_type": 'default',
+       "actions": [
+         {
+           "name": 'game',
+           "text": 'Chess',
+           "type": 'button',
+           "value": 'chess'
+         },
+         {
+           "name": 'game',
+           "text": "Falken's Maze",
+           "type": 'button',
+           "value": 'maze'
+         },
+         {
+           "name": 'game',
+           "text": 'Thermonuclear War',
+           "style": 'danger',
+           "type": 'button',
+           "value": 'war',
+           "confirm": {
+             "title": 'Are you sure?',
+             "text": "Wouldn't you prefer a good game of chess?",
+             "ok_text": 'Yes',
+             "dismiss_text": 'No'
+           }
+         }
+       ]
+     }
+   ]
+ }
+}
+        return make_response(jsonify(result), 404)
+
 
 rides_api = Blueprint('resources.rides', __name__)
 api = Api(rides_api)
@@ -243,3 +288,4 @@ api.add_resource(Ride, '/rides/<int:ride_id>', endpoint='ride')
 api.add_resource(RequestRide, '/rides/<int:ride_id>/requests', endpoint='requestride')
 api.add_resource(RequestList, '/requests', endpoint='requests')
 api.add_resource(Request, '/requests/<int:request_id>', endpoint='request')
+api.add_resource(Slack, '/slack', endpoint='slack')
