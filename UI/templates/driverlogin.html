@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>DRIVER LOGIN</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="stylesheet" type="text/css" href="static/css/main.css">
+</head>
+<body class="bodybg">
+            
+    <div id="topbar">
+        <img id="logo" src="static/images/taxi.jpg">
+        
+        <div id="sign-in-div" class="topbar-section">
+            <img id="signin-image" src="static/images/signin.jpg">
+            
+            <a href="userlogin.html"><span id="signintext">User Sign in</span></a>
+        </div>
+        
+    
+        
+        <div id="sign-in-div" class="topbar-section">
+            <img id="signin-image" src="static/images/signin.jpg">
+            
+            <a href="adminlogin.html"><span id="signintext">Admin Sign in</span></a>
+        </div>
+        
+    </div>
+   
+    <div class="clear"></div>
+           
+    <div id="menubar-container">
+           
+        <div id="menubar">
+        
+            <h1>RIDE-MY-WAY</h1>
+        
+        </div>
+
+    </div>
+    
+    <div class="clear"></div>
+       
+    <div id="menubar2-container">
+       
+       <div id="menubar2">
+           
+           <p>Driver Sign in</p>
+           <a href="index.html"> Home </a>
+           <a href="allrides.html"> Rides </a>
+         
+       </div>
+
+   </div>
+  
+    <div class="clear"></div>
+   
+    <div id="page-container">
+           
+        <div id="main-description">
+            
+            <div id="signupdescription">
+
+                <div class="formwrapper">
+
+                    <h2>New Driver</h2>
+                    <form action="allrides.html" >
+
+                        <div class="form-element">
+
+                            <label class="label" for="email">Email</label>
+                            <input class="inputt" type="email" placeholder = "eg. youremail@gmail.com" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="phone">Telephone</label>
+                            <input class="inputt" type="text" name="phone" id="phone" placeholder = "eg. 0717665593" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="password">Password</label>
+                            <input class="inputt" type="password" name="password" id="password" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="passwordConfirm">Confirm Password</label>
+                            <input class="inputt" type="password" name="passwordConfirm" id="passwordConfirm" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="Numberplate">Number Plate</label>
+                            <input class="inputt" type="text" placeholder = "KBA 379P" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="Model">Model</label>
+
+                            <datalist id="names">
+
+                                <select>
+                                    <option value="Toyota">Toyota</option>
+                                    <option value="Subaru">Subaru</option>
+                                    <option value="Nissan">Nissan</option>
+                                    <option value="Suzuki">Suzuki</option>
+                                    <option value="Peugeot">Peugeot</option>
+                                    <option value="Honda">Honda</option>                                  
+                                    <option value="Isuzu">Isuzu</option> 
+                                    <option value="Mercedes">Mercedes</option>                                  
+
+
+                                </select>
+
+                            </datalist>
+                            
+                            <input class="inputt" type="text" list="names" required>
+
+                        </div>
+
+                        <div class="form-element">
+
+                            <label class="label" for="uploads">Upload Driving Licence, Resume and Car approval</label>
+                            <input id="uploads" type="file" multiple>
+
+                        </div>
+
+
+                        <div class="form-element">
+
+                            <input class="inputt" type="submit" id="submitButton" value="Sign Up">
+
+                        </div>
+
+                    </form>
+
+                </div>
+            </div>
+        </div>
+
+
+        <div id="available">
+            
+            <h3>Already a driver?</h3>
+                    
+            <div>
+            <div class="feature">
+                <div class="wrapper">
+                    <div class="tripfeature">
+                        <div class="loginwrapper">           
+                            <div class="form-element">
+
+                                    <label class="label" for="email">Email</label>
+                                    <input class="inputt" type="email" name="email" id="email" placeholder = "youremail@gmail.com" required>
+
+                                </div>
+                                            
+                                            
+                                <div class="form-element">
+
+                                    <label class="label" for="password">Password</label>
+                                    <input class="inputt" type="password" placeholder = "password" required>
+
+                                </div>
+                                            
+                                <div class="form-element">
+
+                                    <a href="driverrides.html"><input class="inputt" type="submit" id="submitButton" value="Log in"></a>
+
+                                </div>
+
+                            
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
